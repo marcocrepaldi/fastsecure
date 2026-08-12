@@ -91,7 +91,7 @@ const websiteLd = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  const whatsappNumber = process.env.WHATSAPP_NUMBER || '5511999999999';
+  const whatsappNumber = process.env.WHATSAPP_NUMBER || '5511985266582';
   return (
     <html lang="pt-BR">
       <body>

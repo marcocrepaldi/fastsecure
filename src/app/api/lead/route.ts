@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 
 // Número de destino do WhatsApp (formato internacional, só dígitos).
-// Configure em .env.local: WHATSAPP_NUMBER=5511999999999
-const WHATSAPP_NUMBER = process.env.WHATSAPP_NUMBER || '5511999999999';
+// Configure em .env.local: WHATSAPP_NUMBER=5511985266582
+const WHATSAPP_NUMBER = process.env.WHATSAPP_NUMBER || '5511985266582';
 
 interface LeadPayload {
   name?: string;

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 
 interface WhatsAppButtonProps {
-  /** Número em formato internacional, só dígitos. Ex.: 5511999999999 */
+  /** Número em formato internacional, só dígitos. Ex.: 5511985266582 */
   number: string;
   greeting?: string;
   defaultMessage?: string;
