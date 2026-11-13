@@ -43,6 +43,7 @@ export const organizationLd = {
   description: SITE.description,
   telephone: SITE.phoneE164,
   email: SITE.email,
+  logo: abs('/brand/logo-fastsecure-light.png'),
   image: abs('/opengraph-image'),
   address: {
     '@type': 'PostalAddress',

@@ -10,7 +10,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 pt-20 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[1.1fr_3fr]">
           <div>
-            <Logo />
+            <Logo className="h-10" />
             <p className="mt-5 max-w-xs text-sm leading-relaxed">
               Corretora de seguros multi-produto. Comparamos as principais seguradoras para você contratar a proteção
               certa pelo melhor preço.
