@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, MessageCircle, Pause, Play } from 'lucide-react';
 import type { Slide } from '@/lib/slides';
 
 const INTERVAL = 6500;
@@ -47,7 +47,7 @@ export default function BranchSlider({ slides }: { slides: Slide[] }) {
     <section
       aria-roledescription="carrossel"
       aria-label="Principais seguros"
-      className="relative px-4 pt-6 pb-16 sm:px-6 lg:px-8 lg:pb-24"
+      className="relative"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onFocusCapture={() => setHover(true)}
@@ -58,7 +58,7 @@ export default function BranchSlider({ slides }: { slides: Slide[] }) {
       }}
     >
       <div
-        className="relative mx-auto h-[34rem] max-w-7xl overflow-hidden rounded-[2.5rem] bg-ink-900 sm:h-[36rem] lg:h-[38rem]"
+        className="relative h-[40rem] overflow-hidden bg-ink-900 lg:h-[44rem]"
         onTouchStart={(e) => (touchX.current = e.touches[0].clientX)}
         onTouchEnd={(e) => {
           if (touchX.current === null) return;
@@ -84,13 +84,16 @@ export default function BranchSlider({ slides }: { slides: Slide[] }) {
                 alt={s.alt}
                 fill
                 priority={i === 0}
-                sizes="(min-width: 1280px) 1280px, 100vw"
+                sizes="100vw"
                 className={`object-cover object-[70%_center] transition-transform duration-[7000ms] ease-out ${active ? 'scale-105' : 'scale-100'}`}
               />
               {/* Gradiente para legibilidade do texto (lado esquerdo e base no celular) */}
-              <div className="absolute inset-0 bg-gradient-to-t from-ink-950/95 via-ink-950/55 to-ink-950/10 sm:bg-gradient-to-r sm:from-ink-950/90 sm:via-ink-950/50 sm:to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink-950/95 via-ink-950/60 to-ink-950/20 sm:bg-gradient-to-r sm:from-ink-950/95 sm:via-ink-950/60 sm:to-ink-950/5" />
+              {/* Escurece o topo para o menu transparente ficar legível */}
+              <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-ink-950/70 to-transparent" />
 
-              <div className="relative flex h-full max-w-2xl flex-col justify-end p-7 pb-24 text-white sm:justify-center sm:p-14 sm:pb-14 lg:p-20">
+              <div className="relative mx-auto flex h-full max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="flex max-w-2xl flex-col justify-end pt-24 pb-28 text-white sm:justify-center sm:pb-16">
                 <span
                   className={`chip w-fit bg-volt-500 text-ink-900 transition duration-700 ${active ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}
                 >
@@ -106,19 +109,24 @@ export default function BranchSlider({ slides }: { slides: Slide[] }) {
                 >
                   {s.text}
                 </p>
-                <Link
-                  href={s.href}
-                  className={`btn btn-volt mt-8 w-fit transition delay-300 duration-700 ${active ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
+                <div
+                  className={`mt-8 flex flex-wrap gap-3 transition delay-300 duration-700 ${active ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
                 >
-                  {s.cta} <ArrowRight className="size-4" aria-hidden="true" />
-                </Link>
+                  <Link href={s.href} className="btn btn-volt">
+                    {s.cta} <ArrowRight className="size-4" aria-hidden="true" />
+                  </Link>
+                  <a href={s.whatsapp} target="_blank" rel="noopener noreferrer" className="btn btn-ghost-dark backdrop-blur">
+                    <MessageCircle className="size-4" aria-hidden="true" /> Cotar pelo WhatsApp
+                  </a>
+                </div>
+              </div>
               </div>
             </div>
           );
         })}
 
         {/* Controles */}
-        <div className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-start gap-4 p-6 sm:justify-between sm:p-8 lg:px-20">
+        <div className="absolute inset-x-0 bottom-0 z-20 mx-auto flex max-w-7xl items-center justify-start gap-4 px-4 py-7 sm:justify-between sm:px-6 lg:px-8">
           <div className="flex items-center gap-2" role="tablist" aria-label="Escolher slide">
             {slides.map((s, i) => (
               <button

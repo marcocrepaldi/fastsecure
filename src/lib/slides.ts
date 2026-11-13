@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { whatsappUrl } from '@/lib/site';
 
 // Slides dos principais ramos, exibidos na home.
 //
@@ -16,12 +17,16 @@ export type Slide = {
   cta: string;
   image: string;
   alt: string;
+  /** Link do WhatsApp com a mensagem já citando o produto. */
+  whatsapp: string;
 };
 
-type SlideConfig = Omit<Slide, 'image'> & {
+type SlideConfig = Omit<Slide, 'image' | 'whatsapp'> & {
   fallback: string;
   /** Descrição da imagem provisória, quando ela difere da definitiva. */
   fallbackAlt?: string;
+  /** Assunto da mensagem do WhatsApp, quando o eyebrow não serve. */
+  topic?: string;
 };
 
 const config: SlideConfig[] = [
@@ -69,6 +74,7 @@ const config: SlideConfig[] = [
   {
     id: 'empresas',
     eyebrow: 'Para empresas',
+    topic: 'seguros e benefícios para a minha empresa',
     title: 'Benefícios que retêm talentos e cabem no orçamento',
     text: 'Plano de saúde empresarial, vida em grupo e seguros da operação em uma gestão só.',
     href: '/plano-de-saude-empresarial',
@@ -90,8 +96,9 @@ function finalImage(id: string): string | null {
 
 /** Resolve as imagens no build: usa a definitiva se existir, senão a provisória. */
 export function getSlides(): Slide[] {
-  return config.map(({ fallback, fallbackAlt, ...c }) => {
+  return config.map(({ fallback, fallbackAlt, topic, ...c }) => {
     const image = finalImage(c.id);
-    return image ? { ...c, image } : { ...c, image: fallback, alt: fallbackAlt ?? c.alt };
+    const whatsapp = whatsappUrl(`Olá! Vi no site da Fast Secure e quero uma cotação de ${topic ?? c.eyebrow}.`);
+    return image ? { ...c, image, whatsapp } : { ...c, image: fallback, alt: fallbackAlt ?? c.alt, whatsapp };
   });
 }
