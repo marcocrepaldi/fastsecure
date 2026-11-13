@@ -6,7 +6,7 @@
 export const SITE = {
   name: 'Fast Secure',
   legalName: 'Fast Secure Corretora de Seguros',
-  url: (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.fastsecure.com.br').replace(/\/$/, ''),
+  url: (process.env.NEXT_PUBLIC_SITE_URL || 'https://fastsecure.com.br').replace(/\/$/, ''),
   description:
     'Corretora de seguros multi-produto: cotação rápida de seguro auto, plano de saúde, seguro de vida, seguros empresariais, garantias e consórcios, comparando as principais seguradoras.',
   locale: 'pt_BR',
