@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight, ArrowUpRight, BadgeCheck, Building2, Check, Handshake, Scale, Zap } from 'lucide-react';
+import BranchSlider from '@/components/BranchSlider';
 import Icon from '@/components/Icon';
 import JsonLd from '@/components/JsonLd';
 import QuoteForm, { type ProductOptionGroup } from '@/components/QuoteForm';
@@ -7,6 +8,7 @@ import { FaqList, SectionHeading } from '@/components/ui';
 import { categories, popularProducts, products, productsIn } from '@/lib/products';
 import { buildMetadata, faqLd } from '@/lib/seo';
 import { SITE } from '@/lib/site';
+import { getSlides } from '@/lib/slides';
 
 export const metadata = {
   ...buildMetadata({
@@ -99,6 +101,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* SLIDES DOS PRINCIPAIS RAMOS */}
+      <BranchSlider slides={getSlides()} />
 
       {/* FAIXA */}
       <div className="overflow-hidden border-y border-white/5 bg-ink-950 py-5" aria-hidden="true">
