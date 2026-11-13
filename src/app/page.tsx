@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight, ArrowUpRight, BadgeCheck, Building2, Check, Handshake, Scale, Zap } from 'lucide-react';
+import BranchSlider from '@/components/BranchSlider';
 import Icon from '@/components/Icon';
 import JsonLd from '@/components/JsonLd';
 import QuoteForm, { type ProductOptionGroup } from '@/components/QuoteForm';
@@ -7,6 +8,7 @@ import { FaqList, SectionHeading } from '@/components/ui';
 import { categories, popularProducts, products, productsIn } from '@/lib/products';
 import { buildMetadata, faqLd } from '@/lib/seo';
 import { SITE } from '@/lib/site';
+import { getSlides } from '@/lib/slides';
 
 export const metadata = {
   ...buildMetadata({
@@ -62,8 +64,17 @@ export default function Home() {
     <main>
       <JsonLd data={faqLd(faq)} />
 
-      {/* HERO */}
-      <section className="mesh grain relative overflow-hidden pt-28 pb-20 text-white lg:pt-40 lg:pb-28">
+      {/* H1 único para buscadores e leitores de tela; o topo visual é o slider. */}
+      <h1 className="sr-only">
+        Fast Secure, corretora de seguros: cotação de seguro auto, plano de saúde, seguro de vida, residencial e
+        empresarial comparando as principais seguradoras
+      </h1>
+
+      {/* SLIDER — TOPO DA PÁGINA */}
+      <BranchSlider slides={getSlides()} />
+
+      {/* COTAÇÃO */}
+      <section className="mesh grain relative overflow-hidden py-20 text-white lg:py-28">
         <div className="grid-lines pointer-events-none absolute inset-0" aria-hidden="true" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-4 sm:px-6 lg:grid-cols-[1.2fr_1fr] lg:px-8">
           <div>
@@ -71,9 +82,9 @@ export default function Home() {
               <span className="size-2 animate-pulse rounded-full bg-volt-500" aria-hidden="true" />
               {products.length} soluções · {SITE.stats.insurers}+ seguradoras
             </span>
-            <h1 className="display mt-6 text-5xl text-balance sm:text-6xl lg:text-7xl xl:text-[5.5rem]">
+            <h2 className="display mt-6 text-5xl text-balance sm:text-6xl lg:text-7xl">
               Seguro bom é <span className="text-shine">seguro comparado.</span>
-            </h1>
+            </h2>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/70 sm:text-xl">
               Do carro ao plano de saúde da empresa: você conta o que precisa, a gente compara o mercado e devolve as
               melhores opções no seu WhatsApp.
