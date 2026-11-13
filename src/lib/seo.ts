@@ -1,65 +1,101 @@
 import type { Metadata } from 'next';
+import type { Faq, Product } from '@/lib/products';
+import { SITE } from '@/lib/site';
 
 /**
- * Configuração central de SEO da Fast Secure.
- * Defina o domínio real em NEXT_PUBLIC_SITE_URL (ex.: https://www.fastsecure.com.br).
+ * Metadata completa de uma página: canonical + Open Graph + Twitter.
+ * O título da aba recebe " | Fast Secure" pelo template do layout.
  */
-export const SITE = {
-  name: 'Fast Secure',
-  legalName: 'Fast Secure Corretora de Seguros',
-  url: (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.fastsecure.com.br').replace(/\/$/, ''),
-  description:
-    'Corretora de seguros e benefícios multi-produto. Consultoria independente em seguros corporativos, planos de saúde, seguro de vida, patrimônio e investimentos — habilitada SUSEP e ANS.',
-  locale: 'pt_BR',
-  // Imagem de compartilhamento gerada dinamicamente em app/opengraph-image.tsx
-  ogImage: '/opengraph-image',
-  phone: '0800 123 4567',
-  email: 'contato@fastsecure.com.br',
-  address: {
-    street: 'Av. Paulista, 1000',
-    city: 'São Paulo',
-    region: 'SP',
-    country: 'BR',
-  },
-  twitter: '@fastsecure',
-} as const;
-
-interface PageSeo {
+export function buildMetadata({
+  title,
+  description,
+  path,
+}: {
   title: string;
   description: string;
-  /** Caminho absoluto da rota, ex.: '/seguro-auto'. */
   path: string;
-  image?: string;
-}
-
-/**
- * Monta o objeto Metadata completo de uma página: canonical + Open Graph + Twitter.
- */
-export function buildMetadata({ title, description, path, image }: PageSeo): Metadata {
-  const url = SITE.url + path;
-  // O título da aba usa o template "%s | Fast Secure" do layout; removemos o
-  // sufixo aqui para não duplicar. O Open Graph mantém o título completo.
-  const bare = title.replace(/\s*\|\s*Fast Secure\s*$/i, '').trim();
-  const full = `${bare} | ${SITE.name}`;
-  const img = image || SITE.ogImage;
+}): Metadata {
+  const full = `${title} | ${SITE.name}`;
   return {
-    title: bare,
+    title,
     description,
     alternates: { canonical: path },
     openGraph: {
       type: 'website',
       locale: SITE.locale,
-      url,
+      url: SITE.url + path,
       siteName: SITE.name,
       title: full,
       description,
-      images: [{ url: img, width: 1200, height: 630, alt: full }],
     },
-    twitter: {
-      card: 'summary_large_image',
-      title: full,
-      description,
-      images: [img],
-    },
+    twitter: { card: 'summary_large_image', title: full, description },
+  };
+}
+
+const abs = (path: string) => SITE.url + path;
+
+export const organizationLd = {
+  '@context': 'https://schema.org',
+  '@type': 'InsuranceAgency',
+  name: SITE.legalName,
+  alternateName: SITE.name,
+  url: SITE.url,
+  description: SITE.description,
+  telephone: SITE.phoneE164,
+  email: SITE.email,
+  image: abs('/opengraph-image'),
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: SITE.address.street,
+    addressLocality: SITE.address.city,
+    addressRegion: SITE.address.region,
+    addressCountry: SITE.address.country,
+  },
+  areaServed: 'BR',
+};
+
+export const websiteLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.name,
+  url: SITE.url,
+  inLanguage: 'pt-BR',
+};
+
+export function serviceLd(p: Product) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: p.name,
+    serviceType: p.hero.eyebrow,
+    description: p.metaDescription,
+    url: abs(`/${p.slug}`),
+    areaServed: { '@type': 'Country', name: 'Brasil' },
+    provider: { '@type': 'InsuranceAgency', name: SITE.legalName, url: SITE.url },
+  };
+}
+
+export function breadcrumbLd(items: { name: string; path?: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((it, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: it.name,
+      ...(it.path ? { item: abs(it.path) } : {}),
+    })),
+  };
+}
+
+export function faqLd(faq: Faq[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
   };
 }
