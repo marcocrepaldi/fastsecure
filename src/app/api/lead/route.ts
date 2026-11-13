@@ -1,21 +1,28 @@
 import { NextResponse } from 'next/server';
+import { whatsappUrl } from '@/lib/site';
 
-// Número de destino do WhatsApp (formato internacional, só dígitos).
-// Configure em .env.local: WHATSAPP_NUMBER=5511985266582
-const WHATSAPP_NUMBER = process.env.WHATSAPP_NUMBER || '5511985266582';
+/**
+ * Recebe leads dos formulários do site.
+ *
+ * 1. Valida os campos e descarta bots (honeypot "website").
+ * 2. Registra no log do servidor.
+ * 3. Se LEAD_WEBHOOK_URL estiver definido, envia o lead em JSON para lá
+ *    (CRM, Zapier, Make, n8n, planilha…). Falha no webhook não bloqueia o usuário.
+ * 4. Devolve o link do WhatsApp com a mensagem pronta.
+ */
 
-interface LeadPayload {
-  name?: string;
-  email?: string;
-  phone?: string;
-  product?: string;
-  company?: string;
-  employees?: string;
-  interest?: string;
-  source?: string;
-}
+type LeadPayload = Partial<
+  Record<
+    | 'name' | 'phone' | 'email' | 'company' | 'website' | 'product' | 'productSlug'
+    | 'question' | 'answer' | 'source' | 'page' | 'referrer'
+    | 'employees' | 'interest',
+    unknown
+  >
+> & { utm?: unknown };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const str = (v: unknown, max = 200) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 
 export async function POST(req: Request) {
   let data: LeadPayload;
@@ -25,44 +32,77 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'Requisição inválida.' }, { status: 400 });
   }
 
-  const name = data.name?.trim() ?? '';
-  const email = data.email?.trim() ?? '';
-  const phone = data.phone?.trim() ?? '';
+  // Bot preencheu o campo invisível: responde OK sem registrar nada.
+  if (str(data.website)) {
+    return NextResponse.json({ ok: true, whatsappUrl: whatsappUrl() });
+  }
+
+  const name = str(data.name, 120);
+  const phone = str(data.phone, 30);
+  const email = str(data.email, 160);
+  const digits = phone.replace(/\D/g, '');
 
   if (name.length < 2) {
-    return NextResponse.json({ ok: false, error: 'Informe seu nome completo.' }, { status: 400 });
+    return NextResponse.json({ ok: false, error: 'Informe seu nome.' }, { status: 400 });
   }
-  if (!EMAIL_RE.test(email)) {
-    return NextResponse.json({ ok: false, error: 'Informe um e-mail válido.' }, { status: 400 });
+  if (digits.length < 10 || digits.length > 13) {
+    return NextResponse.json({ ok: false, error: 'Informe um WhatsApp válido, com DDD.' }, { status: 400 });
   }
-  if (phone.replace(/\D/g, '').length < 10) {
-    return NextResponse.json({ ok: false, error: 'Informe um telefone/WhatsApp válido.' }, { status: 400 });
+  if (email && !EMAIL_RE.test(email)) {
+    return NextResponse.json({ ok: false, error: 'O e-mail informado parece inválido.' }, { status: 400 });
   }
 
-  // Ponto de integração: aqui você pode persistir em banco, enviar e-mail
-  // ou disparar para um CRM. Por ora registramos no log do servidor.
-  console.log('[LEAD]', {
-    ...data,
+  const utm =
+    data.utm && typeof data.utm === 'object'
+      ? Object.fromEntries(Object.entries(data.utm as Record<string, unknown>).map(([k, v]) => [k.slice(0, 40), str(v)]))
+      : {};
+
+  const lead = {
     name,
-    email,
     phone,
+    email,
+    company: str(data.company, 160),
+    employees: str(data.employees, 40),
+    interest: str(data.interest, 120),
+    product: str(data.product, 120),
+    productSlug: str(data.productSlug, 80),
+    question: str(data.question, 160),
+    answer: str(data.answer, 160),
+    source: str(data.source, 60),
+    page: str(data.page, 200),
+    referrer: str(data.referrer, 300),
+    utm,
     receivedAt: new Date().toISOString(),
-  });
+  };
 
-  // Mensagem pré-preenchida para o WhatsApp da corretora.
+  console.log('[LEAD]', JSON.stringify(lead));
+
+  const webhook = process.env.LEAD_WEBHOOK_URL;
+  if (webhook) {
+    try {
+      const res = await fetch(webhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(lead),
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!res.ok) console.error('[LEAD] webhook respondeu', res.status);
+    } catch (err) {
+      console.error('[LEAD] falha no webhook', err);
+    }
+  }
+
   const lines = [
-    'Olá! Vim pelo site da Fast Secure e gostaria de uma cotação.',
+    `Olá! Vim pelo site da Fast Secure e quero uma cotação${lead.product ? ` de *${lead.product}*` : ''}.`,
     '',
     `*Nome:* ${name}`,
-    `*E-mail:* ${email}`,
-    `*Telefone:* ${phone}`,
+    `*WhatsApp:* ${phone}`,
   ];
-  if (data.company) lines.push(`*Empresa:* ${data.company}`);
-  if (data.employees) lines.push(`*Nº de colaboradores:* ${data.employees}`);
-  if (data.product) lines.push(`*Produto de interesse:* ${data.product}`);
-  if (data.interest) lines.push(`*Interesse principal:* ${data.interest}`);
+  if (email) lines.push(`*E-mail:* ${email}`);
+  if (lead.company) lines.push(`*Empresa:* ${lead.company}`);
+  if (lead.employees) lines.push(`*Colaboradores:* ${lead.employees}`);
+  if (lead.answer) lines.push(`*${lead.question || 'Detalhe'}:* ${lead.answer}`);
+  if (lead.interest) lines.push(`*Interesse:* ${lead.interest}`);
 
-  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`;
-
-  return NextResponse.json({ ok: true, whatsappUrl });
+  return NextResponse.json({ ok: true, whatsappUrl: whatsappUrl(lines.join('\n')) });
 }

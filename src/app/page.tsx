@@ -1,399 +1,303 @@
 import Link from 'next/link';
-import FAQ from '../components/FAQ';
-import LeadFormB2B from '../components/LeadFormB2B';
-import { buildMetadata } from '../lib/seo';
+import { ArrowRight, ArrowUpRight, BadgeCheck, Building2, Check, Handshake, Scale, Zap } from 'lucide-react';
+import Icon from '@/components/Icon';
+import JsonLd from '@/components/JsonLd';
+import QuoteForm, { type ProductOptionGroup } from '@/components/QuoteForm';
+import { FaqList, SectionHeading } from '@/components/ui';
+import { categories, popularProducts, products, productsIn } from '@/lib/products';
+import { buildMetadata, faqLd } from '@/lib/seo';
+import { SITE } from '@/lib/site';
 
 export const metadata = {
   ...buildMetadata({
-    title: 'Corretora de Seguros e Benefícios para Empresas',
+    title: 'Corretora de Seguros',
     description:
-      'Consultoria independente em seguros corporativos, planos de saúde empresarial, seguro de vida, proteção patrimonial e investimentos. Reduza custos e mitigue riscos com a Fast Secure — habilitada SUSEP e ANS. +10.000 vidas protegidas.',
+      'Cote seguro auto, plano de saúde, seguro de vida, residencial, empresarial, garantias e consórcios em um só lugar. Comparamos as principais seguradoras para você.',
     path: '/',
   }),
-  // O template do layout não se aplica ao segmento raiz; marca explícita no título.
-  title: 'Fast Secure | Corretora de Seguros e Benefícios para Empresas',
+  // O template do layout não vale para a raiz: título completo aqui.
+  title: { absolute: 'Fast Secure | Corretora de Seguros — cotação rápida e comparada' },
 };
 
-const faqItems = [
-  {
-    question: 'A Fast Secure trabalha com qual porte de empresa?',
-    answer: 'Atendemos de pequenas e médias empresas a grandes operações com milhares de colaboradores. A consultoria é dimensionada de acordo com o porte, o segmento e o perfil de risco do seu negócio.',
-  },
-  {
-    question: 'Como funciona a gestão de sinistros para empresas?',
-    answer: 'Você tem um consultor dedicado que acompanha cada sinistro de ponta a ponta — abertura, documentação e negociação com a seguradora — para reduzir o tempo de resposta e o impacto na operação.',
-  },
-  {
-    question: 'Vocês ajudam a reduzir o custo total dos seguros e benefícios?',
-    answer: 'Sim. Por sermos uma corretora independente, cotamos entre as principais seguradoras do mercado e estruturamos o programa de risco para equilibrar cobertura e custo, eliminando sobreposições e lacunas.',
-  },
-  {
-    question: 'A Fast Secure é registrada na SUSEP?',
-    answer: 'Sim. Atuamos como corretora devidamente habilitada e seguimos as normas da SUSEP e da ANS, garantindo conformidade em todas as apólices intermediadas.',
-  },
-  {
-    question: 'Em quanto tempo recebo uma proposta?',
-    answer: 'Após o diagnóstico inicial, apresentamos um plano de cobertura e cotações comparativas em poucos dias úteis, dependendo da complexidade do programa.',
-  },
+const productOptions: ProductOptionGroup[] = categories.map((c) => ({
+  group: c.name,
+  items: productsIn(c.id).map((p) => ({ slug: p.slug, name: p.name })),
+}));
+
+const b2bOptions: ProductOptionGroup[] = categories
+  .map((c) => ({
+    group: c.name,
+    items: productsIn(c.id)
+      .filter((p) => p.audience !== 'pf')
+      .map((p) => ({ slug: p.slug, name: p.name })),
+  }))
+  .filter((g) => g.items.length > 0);
+
+const faq = [
+  { q: 'A cotação tem custo?', a: 'Não. A cotação e a consultoria são gratuitas. A corretora é remunerada pela seguradora quando você contrata.' },
+  { q: 'Com quantas seguradoras vocês trabalham?', a: `Com ${SITE.stats.insurers}+ seguradoras e operadoras, o que nos permite comparar preço e cobertura para o seu perfil.` },
+  { q: 'Em quanto tempo recebo as opções?', a: 'Para seguros pessoais simples, normalmente no mesmo dia útil. Seguros empresariais dependem da análise de risco e levam alguns dias.' },
+  { q: 'Pagar por uma corretora sai mais caro?', a: 'Não. O preço do seguro é o mesmo, e a corretora ainda negocia condições e defende você em caso de sinistro.' },
+  { q: 'Vocês ajudam na hora do sinistro?', a: 'Sim. Orientamos a abertura, a documentação e acompanhamos o processo junto à seguradora até a indenização.' },
+];
+
+const b2bPoints = [
+  'Diagnóstico de riscos e benefícios sem custo',
+  'Apólices de várias seguradoras em uma gestão só',
+  'Consultor dedicado para sinistros e renovações',
+  'Relatórios para RH, financeiro e diretoria',
+];
+
+const reasons = [
+  { icon: Zap, title: 'Rápido de verdade', text: 'Formulário de um minuto e resposta pelo WhatsApp. Sem ligação de telemarketing.' },
+  { icon: Scale, title: 'Comparação honesta', text: 'Mostramos as opções lado a lado, inclusive o que cada uma não cobre.' },
+  { icon: Handshake, title: 'Do seu lado no sinistro', text: 'Quando você precisa, quem cuida do processo é a gente.' },
+  { icon: BadgeCheck, title: 'Tudo regulado', text: 'Trabalhamos só com seguradoras e operadoras autorizadas pela SUSEP e pela ANS.' },
 ];
 
 export default function Home() {
+  const marquee = products.map((p) => p.name);
+
   return (
     <main>
+      <JsonLd data={faqLd(faq)} />
+
       {/* HERO */}
-      <section className="hero-modern">
-        <div className="container">
-          <div className="row align-items-center g-5">
-            <div className="col-lg-6" data-reveal>
-              <span className="badge-soft mb-4">
-                <span className="dot" />
-                Corretora corporativa · Multi-produto
-              </span>
-              <h1 className="display-hero text-dark mb-4">
-                Gestão de risco e benefícios que{' '}
-                <span className="text-gradient">protegem o seu negócio</span>
-              </h1>
-              <p className="hero-subtitle fs-5 text-muted mb-4">
-                Consultoria independente em seguros corporativos, benefícios para colaboradores e proteção patrimonial. Estruturamos um programa sob medida para reduzir custos, mitigar riscos e dar previsibilidade à sua operação.
-              </p>
-              <div className="d-flex flex-column flex-sm-row gap-3 mt-4">
-                <a href="#cotacao" className="btn btn-primary btn-lg px-4 py-2 hero-btn-primary">Falar com um especialista</a>
-                <a href="#solucoes" className="btn btn-outline-secondary btn-lg px-4 py-2 bg-white">Ver soluções corporativas</a>
-              </div>
-              <div className="d-flex flex-wrap gap-4 mt-4 pt-2">
-                <span className="hero-chip"><strong>+10.000</strong> vidas protegidas</span>
-                <span className="hero-chip"><strong>15</strong> seguradoras parceiras</span>
-                <span className="hero-chip"><strong>SUSEP</strong> &amp; ANS habilitada</span>
-              </div>
-            </div>
-            <div className="col-lg-6" data-reveal style={{ ['--reveal-delay' as string]: 2 }}>
-              <div className="hero-visual">
-                <img src="/images/seguro_empresarial.png" alt="Proteção empresarial Fast Secure" className="img-fluid shadow-lg w-100" style={{ objectFit: 'cover', maxHeight: '460px' }} />
-                <div className="hero-floating-card shadow-lg">
-                  <div className="d-flex align-items-center gap-3">
-                    <div className="feature-icon bg-light-success mb-0" style={{ width: 48, height: 48, fontSize: '1.2rem' }}>✓</div>
-                    <div>
-                      <div className="fw-bold text-dark">Conta dedicada</div>
-                      <small className="text-muted">Consultor exclusivo do diagnóstico ao sinistro</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TRUST / MÉTRICAS (count-up) */}
-      <section className="trust-strip py-5">
-        <div className="container">
-          <div className="row text-center g-4">
-            <div className="col-6 col-md-3" data-reveal>
-              <div className="metric-number text-primary" data-count="10000" data-prefix="+">+0</div>
-              <div className="trust-label text-muted mt-1">Vidas e bens protegidos</div>
-            </div>
-            <div className="col-6 col-md-3" data-reveal style={{ ['--reveal-delay' as string]: 1 }}>
-              <div className="metric-number text-primary" data-count="15">0</div>
-              <div className="trust-label text-muted mt-1">Seguradoras parceiras</div>
-            </div>
-            <div className="col-6 col-md-3" data-reveal style={{ ['--reveal-delay' as string]: 2 }}>
-              <div className="metric-number text-primary" data-count="30" data-prefix="+">+0</div>
-              <div className="trust-label text-muted mt-1">Soluções de seguro e benefícios</div>
-            </div>
-            <div className="col-6 col-md-3" data-reveal style={{ ['--reveal-delay' as string]: 3 }}>
-              <div className="metric-number text-primary" data-count="98" data-suffix="%">0%</div>
-              <div className="trust-label text-muted mt-1">Índice de renovação de carteira</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* PILARES CORPORATIVOS — Bento grid */}
-      <section id="solucoes" className="py-5 has-glow">
-        <div className="container py-4">
-          <div className="text-center mb-5" data-reveal>
-            <span className="badge-soft mb-3"><span className="dot" />Soluções corporativas</span>
-            <h2 className="section-title">Um programa de proteção completo para a sua empresa</h2>
-            <p className="text-muted mx-auto mt-3" style={{ maxWidth: 680 }}>
-              Organizamos toda a estratégia de risco e benefícios em quatro frentes integradas — pensadas para RH, financeiro e diretoria.
+      <section className="mesh grain relative overflow-hidden pt-28 pb-20 text-white lg:pt-40 lg:pb-28">
+        <div className="grid-lines pointer-events-none absolute inset-0" aria-hidden="true" />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-4 sm:px-6 lg:grid-cols-[1.2fr_1fr] lg:px-8">
+          <div>
+            <span className="chip bg-white/10 text-white ring-1 ring-white/15">
+              <span className="size-2 animate-pulse rounded-full bg-volt-500" aria-hidden="true" />
+              {products.length} soluções · {SITE.stats.insurers}+ seguradoras
+            </span>
+            <h1 className="display mt-6 text-5xl text-balance sm:text-6xl lg:text-7xl xl:text-[5.5rem]">
+              Seguro bom é <span className="text-shine">seguro comparado.</span>
+            </h1>
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/70 sm:text-xl">
+              Do carro ao plano de saúde da empresa: você conta o que precisa, a gente compara o mercado e devolve as
+              melhores opções no seu WhatsApp.
             </p>
+            <div className="mt-10">
+              <p className="text-sm font-semibold text-white/50">Mais procurados</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {popularProducts.slice(0, 8).map((p) => (
+                  <Link
+                    key={p.slug}
+                    href={`/${p.slug}`}
+                    className="chip bg-white/5 text-white/85 ring-1 ring-white/10 transition hover:bg-white hover:text-ink-900"
+                  >
+                    <Icon name={p.icon} className="size-4" />
+                    {p.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
-
-          <div className="row g-4">
-            <div className="col-md-6 col-lg-3" data-reveal>
-              <div className="bento-card">
-                <div className="feature-icon bg-light-primary">👥</div>
-                <h5 className="fw-bold text-dark">Benefícios para colaboradores</h5>
-                <p className="text-muted small">Saúde, odonto, vida em grupo e previdência empresarial para atrair e reter talentos.</p>
-                <ul className="pillar-list">
-                  <li><Link href="/plano-de-saude-empresarial">Plano de Saúde Empresarial</Link></li>
-                  <li><Link href="/seguro-vida-em-grupo">Seguro de Vida em Grupo</Link></li>
-                  <li><Link href="/plano-odontologico">Plano Odontológico</Link></li>
-                  <li><Link href="/previdencia-privada">Previdência Privada</Link></li>
-                </ul>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-3" data-reveal style={{ ['--reveal-delay' as string]: 1 }}>
-              <div className="bento-card">
-                <div className="feature-icon bg-light-success">🏭</div>
-                <h5 className="fw-bold text-dark">Patrimônio &amp; operação</h5>
-                <p className="text-muted small">Proteção de ativos, frota e cadeia logística para manter o negócio rodando.</p>
-                <ul className="pillar-list">
-                  <li><Link href="/seguro-empresarial">Seguro Empresarial</Link></li>
-                  <li><Link href="/seguro-frota">Seguro de Frota</Link></li>
-                  <li><Link href="/seguro-transportes">Transportes &amp; Logística</Link></li>
-                  <li><Link href="/seguro-riscos-engenharia">Riscos de Engenharia</Link></li>
-                </ul>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-3" data-reveal style={{ ['--reveal-delay' as string]: 2 }}>
-              <div className="bento-card">
-                <div className="feature-icon bg-light-warning">🛡️</div>
-                <h5 className="fw-bold text-dark">Responsabilidade &amp; compliance</h5>
-                <p className="text-muted small">Cobertura de responsabilidades e exigências contratuais e regulatórias.</p>
-                <ul className="pillar-list">
-                  <li><Link href="/seguro-rc-profissional">RC Profissional</Link></li>
-                  <li><Link href="/seguro-riscos-ciberneticos">Seguro Cyber</Link></li>
-                  <li><Link href="/seguro-rc-ambiental">RC Ambiental</Link></li>
-                  <li><Link href="/seguro-garantia">Seguro Garantia</Link></li>
-                </ul>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-3" data-reveal style={{ ['--reveal-delay' as string]: 3 }}>
-              <div className="bento-card">
-                <div className="feature-icon bg-light-info">📈</div>
-                <h5 className="fw-bold text-dark">Sucessão &amp; gestão patrimonial</h5>
-                <p className="text-muted small">Planejamento sucessório e financeiro para sócios e gestores.</p>
-                <ul className="pillar-list">
-                  <li><Link href="/seguro-sucessao-empresarial">Sucessão Empresarial</Link></li>
-                  <li><Link href="/investimentos">Investimentos</Link></li>
-                  <li><Link href="/consorcios">Consórcios</Link></li>
-                  <li><Link href="/capitalizacao">Capitalização</Link></li>
-                </ul>
-              </div>
-            </div>
+          <div id="cotacao" className="scroll-mt-28">
+            <QuoteForm productOptions={productOptions} source="home-hero" title="O que vamos proteger?" />
           </div>
         </div>
       </section>
 
-      {/* CATÁLOGO COMPLETO */}
-      <section id="produtos" className="py-5 bg-light">
-        <div className="container">
-          <div className="text-center mb-5" data-reveal>
-            <span className="badge-soft mb-3"><span className="dot" />Catálogo completo</span>
-            <h2 className="section-title">Mais de 30 produtos, uma só corretora</h2>
-            <p className="text-muted mt-3">Da pessoa física à grande operação corporativa</p>
-          </div>
-
-          <ul className="nav nav-pills justify-content-center mb-5 flex-column flex-md-row gap-2" id="products-tab" role="tablist" data-reveal>
-            <li className="nav-item" role="presentation">
-              <button className="nav-link active rounded-pill px-4" id="empresas-tab" data-bs-toggle="pill" data-bs-target="#empresas-pane" type="button" role="tab" aria-controls="empresas-pane" aria-selected="true">Corporativo (B2B)</button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button className="nav-link rounded-pill px-4" id="saude-tab" data-bs-toggle="pill" data-bs-target="#saude" type="button" role="tab" aria-controls="saude" aria-selected="false">Saúde e Odonto</button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button className="nav-link rounded-pill px-4" id="pessoas-tab" data-bs-toggle="pill" data-bs-target="#pessoas" type="button" role="tab" aria-controls="pessoas" aria-selected="false">Seguro de Vida</button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button className="nav-link rounded-pill px-4" id="bens-tab" data-bs-toggle="pill" data-bs-target="#bens" type="button" role="tab" aria-controls="bens" aria-selected="false">Bens e Patrimônio</button>
-            </li>
-            <li className="nav-item" role="presentation">
-              <button className="nav-link rounded-pill px-4" id="prev-tab" data-bs-toggle="pill" data-bs-target="#previdencia" type="button" role="tab" aria-controls="previdencia" aria-selected="false">Investimentos</button>
-            </li>
-          </ul>
-
-          <div className="tab-content" id="products-tabContent" data-reveal>
-            {/* CORPORATIVO (B2B) */}
-            <div className="tab-pane fade show active" id="empresas-pane" role="tabpanel" aria-labelledby="empresas-tab">
-              <div className="row g-4">
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-empresarial" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Empresarial &amp; Frota</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-riscos-engenharia" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Riscos Engenharia</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-rc-ambiental" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">RC Ambiental</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-riscos-ciberneticos" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Seguro Cyber</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-vida-em-grupo" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Vida em Grupo</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-sucessao-empresarial" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Sucessão Empresarial</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-garantia" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Seguro Garantia</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-transportes" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Transportes &amp; Logística</h5></div></Link></div>
-              </div>
-            </div>
-
-            {/* SAÚDE E ODONTO */}
-            <div className="tab-pane fade" id="saude" role="tabpanel" aria-labelledby="saude-tab">
-              <div className="row g-4">
-                <div className="col-md-4 col-lg-3"><Link href="/plano-de-saude-empresarial" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Plano Empresarial</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/plano-por-adesao" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Plano por Adesão</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/plano-de-saude" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Plano Individual/Familiar</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/plano-odontologico" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Plano Odontológico</h5></div></Link></div>
-              </div>
-            </div>
-
-            {/* SEGUROS DE PESSOAS */}
-            <div className="tab-pane fade" id="pessoas" role="tabpanel" aria-labelledby="pessoas-tab">
-              <div className="row g-4">
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-de-vida" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Seguro de Vida</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-acidentes-pessoais" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Acidentes Pessoais</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-prestamista" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Seguro Prestamista</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-viagem" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Seguro Viagem</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-doencas-graves" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Doenças Graves</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-educacional" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Seguro Educacional</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-dit" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Diária Incapacidade (DIT)</h5></div></Link></div>
-              </div>
-            </div>
-
-            {/* BENS E PATRIMÔNIO */}
-            <div className="tab-pane fade" id="bens" role="tabpanel" aria-labelledby="bens-tab">
-              <div className="row g-4">
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-auto" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Seguro Auto</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-motos" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Seguro de Motos</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-residencial" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Seguro Residencial</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-celular-notebook" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Celular &amp; Notebook</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-condominio" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Seguro Condomínio</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-equipamentos-fotograficos" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Equip. Fotográficos</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-fianca" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Fiança Locatícia</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/seguro-rc-profissional" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">RC Profissional</h5></div></Link></div>
-              </div>
-            </div>
-
-            {/* INVESTIMENTOS E CONSÓRCIOS */}
-            <div className="tab-pane fade" id="previdencia" role="tabpanel" aria-labelledby="prev-tab">
-              <div className="row g-4 justify-content-center">
-                <div className="col-md-4 col-lg-3"><Link href="/previdencia-privada" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Previdência Privada</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/consorcios" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Consórcios</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/investimentos" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Investimentos Diversos</h5></div></Link></div>
-                <div className="col-md-4 col-lg-3"><Link href="/capitalizacao" className="card h-100 border-0 text-decoration-none shadow-sm card-hover"><div className="card-body text-center"><h5 className="fw-bold text-dark mt-2">Capitalização</h5></div></Link></div>
-              </div>
-            </div>
-          </div>
+      {/* FAIXA */}
+      <div className="overflow-hidden border-y border-white/5 bg-ink-950 py-5" aria-hidden="true">
+        <div className="flex w-max animate-marquee gap-10 whitespace-nowrap">
+          {[...marquee, ...marquee].map((name, i) => (
+            <span key={i} className="display flex items-center gap-10 text-2xl text-white/25">
+              {name}
+              <span className="size-2 rounded-full bg-volt-500/60" />
+            </span>
+          ))}
         </div>
+      </div>
+
+      {/* NÚMEROS */}
+      <section className="border-b border-ink-100 py-14">
+        <dl className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 text-center sm:px-6 lg:grid-cols-4 lg:px-8">
+          {[
+            [`${SITE.stats.insurers}+`, 'seguradoras e operadoras'],
+            [String(products.length), 'produtos para pessoas e empresas'],
+            [`+${(SITE.stats.lives / 1000).toLocaleString('pt-BR')} mil`, 'vidas e bens protegidos'],
+            ['1 min', 'para pedir sua cotação'],
+          ].map(([n, label], i) => (
+            <div key={label} data-reveal style={{ ['--d' as string]: i }}>
+              <dt className="sr-only">{label}</dt>
+              <dd className="display text-4xl text-ink-900 sm:text-5xl">{n}</dd>
+              <dd className="mt-2 text-sm text-ink-500">{label}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
-      {/* DIFERENCIAIS */}
-      <section className="py-5 bg-white" id="sobre">
-        <div className="container py-4">
-          <div className="row align-items-center g-5">
-            <div className="col-lg-6" data-reveal>
-              <span className="badge-soft mb-3"><span className="dot" />Por que a Fast Secure</span>
-              <h2 className="section-title mb-4">Uma corretora que pensa como parceira estratégica</h2>
-              <p className="text-muted mb-4">
-                Não vendemos apólices avulsas: desenhamos um programa de proteção alinhado aos objetivos da sua empresa. Nossa independência nos permite negociar as melhores condições entre todas as principais seguradoras.
-              </p>
-
-              <div className="differentiator">
-                <div className="differentiator-icon bg-light-primary">🎯</div>
-                <div>
-                  <h6 className="fw-bold text-dark mb-1">Consultoria de risco independente</h6>
-                  <p className="text-muted small mb-0">Mapeamos exposições, eliminamos lacunas e sobreposições de cobertura.</p>
-                </div>
-              </div>
-              <div className="differentiator">
-                <div className="differentiator-icon bg-light-success">🤝</div>
-                <div>
-                  <h6 className="fw-bold text-dark mb-1">Conta dedicada</h6>
-                  <p className="text-muted small mb-0">Um consultor exclusivo acompanha sua empresa do contrato à renovação.</p>
-                </div>
-              </div>
-              <div className="differentiator">
-                <div className="differentiator-icon bg-light-warning">⚡</div>
-                <div>
-                  <h6 className="fw-bold text-dark mb-1">Gestão de sinistros ativa</h6>
-                  <p className="text-muted small mb-0">Cuidamos de toda a tramitação para acelerar a indenização e reduzir o impacto.</p>
-                </div>
-              </div>
-              <div className="differentiator">
-                <div className="differentiator-icon bg-light-info">📊</div>
-                <div>
-                  <h6 className="fw-bold text-dark mb-1">Otimização de custos</h6>
-                  <p className="text-muted small mb-0">Comparamos o mercado e estruturamos o programa para o melhor custo-benefício.</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-5 offset-lg-1" data-reveal style={{ ['--reveal-delay' as string]: 1 }}>
-              <div className="card border-0 testimonial-card">
-                <div className="card-body p-5">
-                  <div className="quote-mark text-primary">&ldquo;</div>
-                  <p className="fs-5 fw-medium text-dark mb-4">
-                    A Fast Secure reorganizou todo o nosso programa de benefícios e seguros patrimoniais. Reduzimos custos e ganhamos um parceiro que resolve os sinistros por nós.
-                  </p>
-                  <div className="d-flex align-items-center">
-                    <div className="testimonial-avatar">RM</div>
-                    <div className="ms-3">
-                      <div className="fw-bold text-dark">Diretoria de RH</div>
-                      <small className="text-muted">Indústria · 320 colaboradores</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* CATEGORIAS — bento */}
+      <section className="py-20 lg:py-28">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+            <SectionHeading
+              eyebrow="Uma corretora, todos os seguros"
+              title="Tudo o que você e sua empresa precisam proteger"
+            />
+            <Link href="/produtos" className="btn btn-ghost self-start lg:self-auto" data-reveal>
+              Ver catálogo completo <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </div>
+          <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {categories.map((c, i) => {
+              const items = productsIn(c.id);
+              const featured = i < 2;
+              return (
+                <article
+                  key={c.id}
+                  data-reveal
+                  style={{ ['--d' as string]: i % 4 }}
+                  className={`group relative flex flex-col overflow-hidden rounded-4xl p-7 ${
+                    featured ? 'mesh grain text-white lg:col-span-2' : 'border border-ink-100 bg-ink-50'
+                  }`}
+                >
+                  <span
+                    className={`grid size-12 place-items-center rounded-2xl ${
+                      featured ? 'bg-volt-500 text-ink-900' : 'bg-white text-brand-600 shadow-soft'
+                    }`}
+                  >
+                    <Icon name={c.icon} className="size-6" />
+                  </span>
+                  <h3 className="display mt-6 text-2xl">{c.name}</h3>
+                  <p className={`mt-1 text-sm ${featured ? 'text-white/60' : 'text-ink-500'}`}>{c.tagline}</p>
+                  <ul className={`mt-6 flex flex-wrap gap-2 ${featured ? '' : 'flex-col gap-1.5'}`}>
+                    {items.slice(0, featured ? 8 : 5).map((p) =>
+                      featured ? (
+                        <li key={p.slug}>
+                          <Link
+                            href={`/${p.slug}`}
+                            className="chip bg-white/10 text-white/85 ring-1 ring-white/10 transition hover:bg-white hover:text-ink-900"
+                          >
+                            {p.name}
+                          </Link>
+                        </li>
+                      ) : (
+                        <li key={p.slug}>
+                          <Link href={`/${p.slug}`} className="text-sm font-medium text-ink-700 hover:text-brand-600">
+                            {p.name}
+                          </Link>
+                        </li>
+                      ),
+                    )}
+                  </ul>
+                  <Link
+                    href={`/produtos#${c.id}`}
+                    className={`mt-auto flex items-center gap-1.5 pt-6 text-sm font-bold ${featured ? 'text-volt-500' : 'text-brand-600'}`}
+                  >
+                    {items.length} produtos <ArrowUpRight className="size-4" aria-hidden="true" />
+                  </Link>
+                </article>
+              );
+            })}
+            <Link
+              href="/produtos"
+              data-reveal
+              className="group flex flex-col justify-between gap-8 rounded-4xl bg-brand-500 p-7 text-white transition hover:bg-brand-600 md:col-span-1 lg:col-span-3 lg:flex-row lg:items-end lg:p-10"
+            >
+              <span className="display max-w-md text-3xl lg:text-4xl">Não achou o que procura? Temos {products.length} produtos.</span>
+              <span className="flex shrink-0 items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-ink-900">
+                Ver catálogo completo
+                <ArrowRight className="size-4 transition group-hover:translate-x-1" aria-hidden="true" />
+              </span>
+            </Link>
           </div>
         </div>
       </section>
 
       {/* COMO FUNCIONA */}
-      <section className="py-5 bg-light" id="processo">
-        <div className="container py-4">
-          <div className="text-center mb-5" data-reveal>
-            <span className="badge-soft mb-3"><span className="dot" />Como funciona</span>
-            <h2 className="section-title">Da análise à proteção em 4 passos</h2>
+      <section id="como-funciona" className="scroll-mt-20 bg-ink-50 py-20 lg:py-28">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionHeading center eyebrow="Como funciona" title="Da dúvida à apólice em três passos" />
+          <ol className="mt-14 grid gap-5 md:grid-cols-3">
+            {[
+              ['Conte o que precisa', 'Escolha o produto e responda uma pergunta rápida. Leva menos de um minuto.'],
+              ['A gente compara', `Cotamos com ${SITE.stats.insurers}+ seguradoras e separamos as opções que fazem sentido para você.`],
+              ['Você decide', 'Recebe tudo no WhatsApp, tira dúvidas com um especialista e contrata sem burocracia.'],
+            ].map(([t, d], i) => (
+              <li key={t} data-reveal style={{ ['--d' as string]: i }} className="relative rounded-4xl bg-white p-8 shadow-soft">
+                <span className="display text-7xl text-brand-500/15">0{i + 1}</span>
+                <h3 className="mt-2 text-xl font-bold">{t}</h3>
+                <p className="mt-2 leading-relaxed text-ink-500">{d}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* EMPRESAS */}
+      <section id="empresas" className="scroll-mt-20 px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+        <div className="mesh grain relative mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] px-6 py-14 text-white sm:px-12 lg:py-20">
+          <div className="grid-lines pointer-events-none absolute inset-0" aria-hidden="true" />
+          <div className="relative grid items-center gap-12 lg:grid-cols-[1fr_1fr]">
+            <div>
+              <span className="chip bg-white/10 ring-1 ring-white/15">
+                <Building2 className="size-4 text-volt-500" aria-hidden="true" /> Para empresas
+              </span>
+              <h2 className="display mt-5 text-4xl sm:text-5xl">Risco e benefícios da sua empresa em uma gestão só</h2>
+              <p className="mt-5 text-lg text-white/70">
+                Plano de saúde, vida em grupo, frota, patrimonial, D&amp;O, cyber, garantias e SST. Desenhamos o programa,
+                negociamos com o mercado e cuidamos do dia a dia.
+              </p>
+              <ul className="mt-8 space-y-3">
+                {b2bPoints.map((t) => (
+                  <li key={t} className="flex items-center gap-3">
+                    <span className="grid size-6 place-items-center rounded-full bg-volt-500 text-ink-900">
+                      <Check className="size-4" strokeWidth={3} aria-hidden="true" />
+                    </span>
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <QuoteForm
+              productOptions={b2bOptions}
+              source="home-b2b"
+              b2b
+              title="Diagnóstico para empresas"
+              subtitle="Escolha a principal necessidade. Um especialista corporativo fala com você."
+            />
           </div>
-          <div className="row g-4">
-            <div className="col-md-6 col-lg-3" data-reveal>
-              <div className="step-card">
-                <div className="step-number">1</div>
-                <h6 className="fw-bold text-dark">Diagnóstico</h6>
-                <p className="text-muted small mb-0">Entendemos seu negócio, riscos e benefícios atuais.</p>
+        </div>
+      </section>
+
+      {/* POR QUE */}
+      <section className="pb-20 lg:pb-28">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionHeading eyebrow="Por que a Fast Secure" title="Seguro sem letra miúda escondida" />
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {reasons.map((r, i) => (
+              <div key={r.title} data-reveal style={{ ['--d' as string]: i }} className="rounded-3xl border border-ink-100 p-7">
+                <r.icon className="size-7 text-brand-500" strokeWidth={1.75} aria-hidden="true" />
+                <h3 className="mt-5 text-lg font-bold">{r.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-500">{r.text}</p>
               </div>
-            </div>
-            <div className="col-md-6 col-lg-3" data-reveal style={{ ['--reveal-delay' as string]: 1 }}>
-              <div className="step-card">
-                <div className="step-number">2</div>
-                <h6 className="fw-bold text-dark">Cotação comparativa</h6>
-                <p className="text-muted small mb-0">Negociamos condições entre as principais seguradoras.</p>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-3" data-reveal style={{ ['--reveal-delay' as string]: 2 }}>
-              <div className="step-card">
-                <div className="step-number">3</div>
-                <h6 className="fw-bold text-dark">Implantação</h6>
-                <p className="text-muted small mb-0">Estruturamos as apólices e fazemos o onboarding da equipe.</p>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-3" data-reveal style={{ ['--reveal-delay' as string]: 3 }}>
-              <div className="step-card">
-                <div className="step-number">4</div>
-                <h6 className="fw-bold text-dark">Acompanhamento</h6>
-                <p className="text-muted small mb-0">Gestão contínua, sinistros e renovação otimizada.</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <FAQ items={faqItems} title="Perguntas frequentes de empresas" />
-
-      {/* CTA / FORMULÁRIO — seção navy de destaque */}
-      <section id="cotacao" className="py-5">
-        <div className="container py-4">
-          <div className="section-dark" data-reveal>
-            <div className="p-4 p-md-5">
-              <div className="row align-items-center g-5">
-                <div className="col-lg-5">
-                  <span className="badge-soft mb-3"><span className="dot" />Diagnóstico gratuito</span>
-                  <h2 className="section-title mb-3">Receba uma análise de risco sem compromisso</h2>
-                  <p className="text-muted mb-4">Um especialista entra em contato para entender sua empresa e apresentar um programa de proteção sob medida.</p>
-                  <ul className="cta-list text-muted">
-                    <li>Resposta em até 1 dia útil</li>
-                    <li>Cotação comparativa entre seguradoras</li>
-                    <li>Sem custo e sem compromisso</li>
-                  </ul>
-                </div>
-                <div className="col-lg-7">
-                  <LeadFormB2B />
-                </div>
-              </div>
-            </div>
+      <section id="duvidas" className="scroll-mt-20 bg-ink-50 py-20 lg:py-28">
+        <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[1fr_1.4fr] lg:px-8">
+          <SectionHeading eyebrow="Dúvidas" title="Perguntas frequentes" text="Não encontrou a sua? Chame no WhatsApp." />
+          <div data-reveal>
+            <FaqList items={faq} />
           </div>
+        </div>
+      </section>
+
+      {/* CTA FINAL */}
+      <section className="px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] bg-volt-500 px-6 py-16 text-center text-ink-900 sm:px-12" data-reveal>
+          <h2 className="display mx-auto max-w-3xl text-4xl sm:text-6xl">Sua cotação começa em um minuto.</h2>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-ink-700">Sem custo, sem compromisso e sem ligação de telemarketing.</p>
+          <a href="#cotacao" className="btn mt-8 bg-ink-900 px-8 py-4 text-base text-white hover:bg-ink-800">
+            Começar agora <ArrowRight className="size-5" aria-hidden="true" />
+          </a>
         </div>
       </section>
     </main>
