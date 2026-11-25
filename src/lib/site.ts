@@ -10,9 +10,9 @@ export const SITE = {
   description:
     'Corretora de seguros multi-produto: cotação rápida de seguro auto, plano de saúde, seguro de vida, seguros empresariais, garantias e consórcios, comparando as principais seguradoras.',
   locale: 'pt_BR',
-  phone: '(11) 98526-6582',
+  phone: '(11) 92784-5928',
   /** Mesmo número em formato internacional, para links tel: e dados estruturados. */
-  phoneE164: '+5511985266582',
+  phoneE164: '+5511927845928',
   email: 'contato@fastsecure.com.br',
   address: {
     street: 'Av. Paulista, 1000',
@@ -30,7 +30,7 @@ export const SITE = {
 
 /** Número de WhatsApp que recebe os leads (só dígitos, com DDI). Somente no servidor. */
 export function whatsappNumber(): string {
-  return (process.env.WHATSAPP_NUMBER || '5511985266582').replace(/\D/g, '');
+  return (process.env.WHATSAPP_NUMBER || '5511927845928').replace(/\D/g, '');
 }
 
 /** Link wa.me com mensagem opcional. Use em Server Components. */
