@@ -63,6 +63,9 @@ export default function Footer() {
             <Link href="/produtos" className="hover:text-white">
               Todos os produtos
             </Link>
+            <Link href="/blog" className="hover:text-white">
+              Blog
+            </Link>
             <Link href="/privacidade" className="hover:text-white">
               Política de Privacidade
             </Link>

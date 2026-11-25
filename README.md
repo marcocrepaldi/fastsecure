@@ -48,3 +48,19 @@ produto, resposta da pergunta de qualificação, página de origem e parâmetros
 1. registrado no log do servidor (`[LEAD] {...}`);
 2. enviado para `LEAD_WEBHOOK_URL`, se configurado;
 3. devolvido como link do WhatsApp com a mensagem pronta, que abre para o visitante.
+
+## Blog (`/blog`)
+
+Cada matéria é um arquivo Markdown em `content/blog/<endereço>.md`. Use `content/blog/_MODELO.md` como ponto de partida
+(arquivos que começam com `_` não são publicados).
+
+- **Cabeçalho:** `title`, `description`, `date` (AAAA-MM-DD), `category` (id de uma categoria do catálogo),
+  `products` (slugs do catálogo; o primeiro vira o formulário de cotação da matéria), `tags` e, opcionalmente, `updated`.
+- **Agendamento:** matéria com `date` futura fica escondida e entra no ar sozinha no dia (fuso de São Paulo).
+  As páginas do blog, o sitemap e o RSS são revalidados a cada hora, sem novo deploy.
+- **Texto:** `##` e `###` para subtítulos, listas com `-` ou `1.`, `>` para destaque, tabelas com `|`,
+  `**negrito**`, `*itálico*` e `[link](/seguro-auto)`. Uma seção `## Perguntas frequentes` com perguntas em `###`
+  vira FAQ estruturado para o Google (a resposta é o primeiro parágrafo abaixo de cada pergunta).
+- **SEO automático:** canonical, Open Graph `article`, imagem de compartilhamento, JSON-LD `BlogPosting` +
+  `BreadcrumbList` + `FAQPage`, sumário, sitemap, RSS em `/blog/rss.xml` e links para os produtos citados.
+- Um erro no cabeçalho (data, categoria ou produto inexistente) interrompe o build com a mensagem do arquivo.

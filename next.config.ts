@@ -10,6 +10,12 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // As matérias são lidas do disco também nas revalidações (agendamento), então vão junto no deploy.
+  outputFileTracingIncludes: {
+    '/blog': ['./content/blog/**/*'],
+    '/blog/**/*': ['./content/blog/**/*'],
+    '/sitemap.xml': ['./content/blog/**/*'],
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },

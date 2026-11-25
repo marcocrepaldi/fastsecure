@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { Faq, Product } from '@/lib/products';
 import { SITE } from '@/lib/site';
+import type { PostMeta } from '@/lib/blog';
 
 /**
  * Metadata completa de uma página: canonical + Open Graph + Twitter.
@@ -10,10 +11,13 @@ export function buildMetadata({
   title,
   description,
   path,
+  article,
 }: {
   title: string;
   description: string;
   path: string;
+  /** Matéria do blog: Open Graph do tipo "article" com datas e seção. */
+  article?: { publishedTime: string; modifiedTime?: string; section: string; tags?: string[] };
 }): Metadata {
   const full = `${title} | ${SITE.name}`;
   return {
@@ -21,7 +25,16 @@ export function buildMetadata({
     description,
     alternates: { canonical: path },
     openGraph: {
-      type: 'website',
+      ...(article
+        ? {
+            type: 'article' as const,
+            publishedTime: article.publishedTime,
+            modifiedTime: article.modifiedTime ?? article.publishedTime,
+            section: article.section,
+            tags: article.tags,
+            authors: [SITE.name],
+          }
+        : { type: 'website' as const }),
       locale: SITE.locale,
       url: SITE.url + path,
       siteName: SITE.name,
@@ -98,5 +111,32 @@ export function faqLd(faq: Faq[]) {
       name: f.q,
       acceptedAnswer: { '@type': 'Answer', text: f.a },
     })),
+  };
+}
+
+/** Horário fixo de publicação (09:00 em São Paulo) para as datas AAAA-MM-DD das matérias. */
+export const postDateTime = (d: string) => `${d}T09:00:00-03:00`;
+
+export function blogPostingLd(p: PostMeta, sectionName: string) {
+  const url = abs(`/blog/${p.slug}`);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: p.title,
+    description: p.description,
+    url,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    datePublished: postDateTime(p.date),
+    dateModified: postDateTime(p.updated ?? p.date),
+    inLanguage: 'pt-BR',
+    articleSection: sectionName,
+    keywords: p.tags.join(', ') || undefined,
+    image: abs(`/blog/${p.slug}/opengraph-image`),
+    author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+    publisher: {
+      '@type': 'Organization',
+      name: SITE.legalName,
+      logo: { '@type': 'ImageObject', url: abs('/brand/logo-fastsecure-light.png') },
+    },
   };
 }

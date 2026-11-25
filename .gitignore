@@ -29,3 +29,7 @@ yarn-error.log*
 
 # OS Files
 .DS_Store
+
+# Páginas antigas (maio/2026) fora do build
+_legado-paginas-maio-2026/
+rodar-local.command

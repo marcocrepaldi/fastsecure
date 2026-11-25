@@ -9,7 +9,7 @@ import Logo from './Logo';
 export type NavCategory = { id: string; name: string; items: { slug: string; name: string }[] };
 
 /** Páginas sem formulário próprio: o CTA leva para o formulário da home. */
-const NO_FORM = ['/produtos', '/privacidade'];
+const NO_FORM = ['/produtos', '/privacidade', '/blog'];
 
 export default function Header({ nav }: { nav: NavCategory[] }) {
   const pathname = usePathname();
@@ -45,7 +45,7 @@ export default function Header({ nav }: { nav: NavCategory[] }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [drawer]);
 
-  const cta = NO_FORM.includes(pathname) ? '/#cotacao' : '#cotacao';
+  const cta = NO_FORM.includes(pathname) || pathname.startsWith('/blog/categoria') ? '/#cotacao' : '#cotacao';
 
   return (
     <header
@@ -74,6 +74,7 @@ export default function Header({ nav }: { nav: NavCategory[] }) {
           {[
             ['Para empresas', '/#empresas'],
             ['Como funciona', '/#como-funciona'],
+            ['Blog', '/blog'],
             ['Dúvidas', '/#duvidas'],
           ].map(([label, href]) => (
             <Link
@@ -193,6 +194,7 @@ export default function Header({ nav }: { nav: NavCategory[] }) {
                 ['Todos os produtos', '/produtos'],
                 ['Para empresas', '/#empresas'],
                 ['Como funciona', '/#como-funciona'],
+                ['Blog', '/blog'],
               ].map(([label, href]) => (
                 <Link key={href} href={href} className="block py-2 font-semibold text-white/80">
                   {label}
