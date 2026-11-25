@@ -1,6 +1,7 @@
 ---
 title: Plano de saúde empresarial com CNPJ ou MEI: como funciona
 description: Entenda quem pode entrar, como funcionam carências e reajustes nos planos PME e o que conferir antes de contratar plano de saúde pelo CNPJ.
+coverAlt: Dono de uma cafeteria conversa sorrindo com duas funcionárias atrás do balcão.
 date: 2026-11-25
 category: saude
 products: [plano-de-saude-empresarial, plano-de-saude, plano-odontologico]

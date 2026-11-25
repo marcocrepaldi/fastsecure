@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowUpRight, Clock } from 'lucide-react';
 import { formatDate, type PostMeta } from '@/lib/blog';
@@ -27,13 +28,30 @@ export function PostCard({ p, i = 0, featured = false }: { p: PostMeta; i?: numb
       }`}
     >
       <div
-        className={`mesh grain relative flex shrink-0 items-end overflow-hidden p-6 text-white ${
+        className={`relative flex shrink-0 items-end overflow-hidden p-6 text-white ${p.cover ? 'bg-ink-900' : 'mesh grain'} ${
           featured ? 'min-h-56 lg:min-h-full lg:w-1/2 lg:p-10' : 'min-h-40'
         }`}
-        aria-hidden="true"
       >
-        <div className="grid-lines absolute inset-0" />
-        <span className="chip relative bg-white/10 text-white ring-1 ring-white/15">{cat.name}</span>
+        {p.cover ? (
+          <>
+            <Image
+              src={p.cover.src}
+              alt={p.cover.alt}
+              fill
+              priority={featured}
+              className="object-cover"
+              sizes={
+                featured
+                  ? '(min-width: 1024px) 50vw, 100vw'
+                  : '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'
+              }
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" aria-hidden="true" />
+          </>
+        ) : (
+          <div className="grid-lines absolute inset-0" aria-hidden="true" />
+        )}
+        <span className="chip relative z-10 bg-white/10 text-white ring-1 ring-white/15">{cat.name}</span>
       </div>
       <div className={`flex flex-1 flex-col p-6 ${featured ? 'lg:p-10' : ''}`}>
         <PostMetaLine p={p} />

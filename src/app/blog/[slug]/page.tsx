@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowRight, ChevronRight, MessageCircle } from 'lucide-react';
@@ -92,6 +93,21 @@ export default async function BlogPostPage(props: PageProps<'/blog/[slug]'>) {
           </div>
         </div>
       </section>
+
+      {post.cover && (
+        <div className="relative z-10 mx-auto -mt-8 max-w-6xl px-4 sm:px-6 lg:px-8">
+          <figure className="relative aspect-video overflow-hidden rounded-3xl bg-ink-900 shadow-lift ring-1 ring-black/5">
+            <Image
+              src={post.cover.src}
+              alt={post.cover.alt}
+              fill
+              priority
+              className="object-cover"
+              sizes="(min-width: 1024px) 72rem, 100vw"
+            />
+          </figure>
+        </div>
+      )}
 
       <div className="mx-auto grid max-w-6xl gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,1fr)_17rem] lg:px-8 lg:py-20">
         <article className="post-body min-w-0" dangerouslySetInnerHTML={{ __html: post.html }} />

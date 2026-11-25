@@ -119,6 +119,7 @@ export const postDateTime = (d: string) => `${d}T09:00:00-03:00`;
 
 export function blogPostingLd(p: PostMeta, sectionName: string) {
   const url = abs(`/blog/${p.slug}`);
+  const socialImage = abs(`/blog/${p.slug}/opengraph-image`);
   return {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -131,7 +132,7 @@ export function blogPostingLd(p: PostMeta, sectionName: string) {
     inLanguage: 'pt-BR',
     articleSection: sectionName,
     keywords: p.tags.join(', ') || undefined,
-    image: abs(`/blog/${p.slug}/opengraph-image`),
+    image: p.cover ? [abs(p.cover.src), socialImage] : socialImage,
     author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
     publisher: {
       '@type': 'Organization',

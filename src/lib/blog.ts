@@ -5,6 +5,7 @@
 //   ---
 //   title: Título da matéria (até ~65 caracteres)
 //   description: Resumo para o Google e para o card (até ~155 caracteres)
+//   coverAlt: Descrição acessível da foto de capa (opcional)
 //   date: 2026-11-26            ← data de publicação (fuso de São Paulo)
 //   updated: 2026-12-02         ← opcional: data da última revisão
 //   category: veiculos          ← uma das categorias do catálogo (src/lib/products/index.ts)
@@ -17,7 +18,7 @@
 // Uma seção "## Perguntas frequentes" com perguntas em "### " vira FAQ estruturado para o Google
 // (a resposta de cada pergunta é o primeiro parágrafo ou lista logo abaixo dela).
 
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { categories, getProduct, type CategoryId, type Faq, type Product } from '@/lib/products';
 
@@ -25,6 +26,7 @@ const DIR = join(process.cwd(), 'content/blog');
 const TZ = 'America/Sao_Paulo';
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const COVER_EXTS = ['webp', 'jpg', 'jpeg', 'png'];
 
 export type Heading = { id: string; text: string; level: 2 | 3 };
 
@@ -38,6 +40,7 @@ export type PostMeta = {
   products: string[];
   tags: string[];
   readingMinutes: number;
+  cover: { src: string; alt: string } | undefined;
 };
 
 export type Post = PostMeta & { html: string; headings: Heading[]; faq: Faq[] };
@@ -237,6 +240,14 @@ export function renderMarkdown(md: string): Rendered {
 
 const categoryIds = new Set<string>(categories.map((c) => c.id));
 
+function coverImage(slug: string): string | undefined {
+  for (const ext of COVER_EXTS) {
+    const rel = `/images/blog/${slug}.${ext}`;
+    if (existsSync(join(process.cwd(), 'public', rel))) return rel;
+  }
+  return undefined;
+}
+
 function loadPost(file: string): Post {
   const slug = file.replace(/\.md$/, '');
   if (!SLUG_RE.test(slug)) throw new Error(`[blog] ${file}: nome do arquivo deve ser minúsculo, sem acento, com hífens`);
@@ -265,6 +276,7 @@ function loadPost(file: string): Post {
   }
 
   const rendered = renderMarkdown(body);
+  const coverSrc = coverImage(slug);
   return {
     slug,
     title: str('title')!,
@@ -275,6 +287,7 @@ function loadPost(file: string): Post {
     products,
     tags: list('tags'),
     readingMinutes: Math.max(1, Math.round(rendered.words / 200)),
+    cover: coverSrc ? { src: coverSrc, alt: str('coverAlt', false) ?? '' } : undefined,
     html: rendered.html,
     headings: rendered.headings,
     faq: rendered.faq,

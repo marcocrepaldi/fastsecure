@@ -1,6 +1,7 @@
 ---
 title: O que muda o preço do seguro auto e como pagar menos
 description: Perfil do condutor, CEP, uso do carro, bônus e franquia explicam a diferença de preço entre cotações. Veja como economizar sem perder cobertura.
+coverAlt: Mulher brasileira consulta o celular no banco do motorista de um carro estacionado em uma rua arborizada.
 date: 2026-11-25
 category: veiculos
 products: [seguro-auto, seguro-motos, seguro-frota]

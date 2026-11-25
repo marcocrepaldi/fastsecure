@@ -55,7 +55,11 @@ Cada matéria é um arquivo Markdown em `content/blog/<endereço>.md`. Use `cont
 (arquivos que começam com `_` não são publicados).
 
 - **Cabeçalho:** `title`, `description`, `date` (AAAA-MM-DD), `category` (id de uma categoria do catálogo),
-  `products` (slugs do catálogo; o primeiro vira o formulário de cotação da matéria), `tags` e, opcionalmente, `updated`.
+  `products` (slugs do catálogo; o primeiro vira o formulário de cotação da matéria), `tags` e, opcionalmente, `updated`
+  e `coverAlt` (descrição acessível da foto de capa).
+- **Capa:** salve em `public/images/blog/<slug>.webp`, com o mesmo nome do arquivo Markdown. Use proporção 16:9,
+  resolução mínima de 1600×900 px e até 300 KB. Também são aceitos `.jpg`, `.jpeg` e `.png`; sem arquivo, o fundo
+  quadriculado continua sendo exibido.
 - **Agendamento:** matéria com `date` futura fica escondida e entra no ar sozinha no dia (fuso de São Paulo).
   As páginas do blog, o sitemap e o RSS são revalidados a cada hora, sem novo deploy.
 - **Texto:** `##` e `###` para subtítulos, listas com `-` ou `1.`, `>` para destaque, tabelas com `|`,

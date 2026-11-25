@@ -1,4 +1,4 @@
-import { ogCard, ogSize } from '@/lib/og';
+import { ogCard, ogSize, publicImageDataUrl } from '@/lib/og';
 import { getPost, publishedPosts } from '@/lib/blog';
 import { getCategory } from '@/lib/products';
 
@@ -18,5 +18,6 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     eyebrow: p ? `Blog · ${getCategory(p.category).name}` : 'Blog Fast Secure',
     title: p?.title ?? 'Seguro explicado sem letra miúda.',
     footer: 'fastsecure.com.br/blog',
+    backgroundSrc: p?.cover ? await publicImageDataUrl(p.cover.src) : undefined,
   });
 }

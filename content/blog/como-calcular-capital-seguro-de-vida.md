@@ -1,6 +1,7 @@
 ---
 title: Seguro de vida: como calcular o capital segurado ideal
 description: Um método simples para definir quanto de seguro de vida contratar, somando dívidas, despesas da família e objetivos, e descontando reservas.
+coverAlt: Casal organiza o orçamento da família à mesa enquanto o filho faz a lição ao fundo.
 date: 2026-11-25
 category: vida
 products: [seguro-de-vida, seguro-doencas-graves, seguro-dit]
