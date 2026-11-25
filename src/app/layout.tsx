@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { Bricolage_Grotesque, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import Header, { type NavCategory } from '@/components/Header';
@@ -44,6 +45,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: '#080c1a' };
 
+const GA_MEASUREMENT_ID = 'G-3SJ23EXJVS';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const nav: NavCategory[] = categories.map((c) => ({
     id: c.id,
@@ -76,6 +79,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Footer />
         <WhatsAppFab number={whatsappNumber()} names={names} />
         <Reveal />
+        {process.env.NODE_ENV === 'production' && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="fastsecure-ga4" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag() { window.dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', '${GA_MEASUREMENT_ID}');
+              `}
+            </Script>
+          </>
+        )}
       </body>
     </html>
   );
