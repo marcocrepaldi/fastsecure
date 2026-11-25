@@ -21,7 +21,9 @@ export type Product = {
   popular?: boolean;
   metaTitle: string;
   metaDescription: string;
-  hero: { eyebrow: string; title: string; subtitle: string };
+  hero: { eyebrow: string; title: string; subtitle: string; image?: string };
+  quoteComparison?: { label: string; description: string };
+  comparisonGuide?: { title: string; items: Item[]; article: { href: string; label: string } };
   /** O que acontece sem a proteção (3 itens). */
   pains: Item[];
   /** Principais coberturas (6 itens). */

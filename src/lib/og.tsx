@@ -30,12 +30,16 @@ export function ogCard({
   title,
   footer,
   backgroundSrc,
+  fullBleedBackground = false,
 }: {
   eyebrow: string;
   title: string;
   footer: string;
   backgroundSrc?: string;
+  fullBleedBackground?: boolean;
 }) {
+  const padding = 72;
+  const backgroundOffset = fullBleedBackground ? -padding : 0;
   return new ImageResponse(
     (
       <div
@@ -45,7 +49,7 @@ export function ogCard({
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          padding: '72px',
+          padding,
           color: '#fff',
           backgroundColor: '#080c1a',
           ...(backgroundSrc
@@ -66,15 +70,14 @@ export function ogCard({
               alt=""
               width={ogSize.width}
               height={ogSize.height}
-              style={{ position: 'absolute', top: 0, left: 0, width: '1200px', height: '630px', objectFit: 'cover' }}
+              style={{ position: 'absolute', top: backgroundOffset, left: backgroundOffset, ...ogSize, objectFit: 'cover' }}
             />
             <div
               style={{
                 position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '1200px',
-                height: '630px',
+                top: backgroundOffset,
+                left: backgroundOffset,
+                ...ogSize,
                 background:
                   'linear-gradient(90deg, rgba(8,12,26,0.96) 0%, rgba(8,12,26,0.78) 58%, rgba(8,12,26,0.42) 100%)',
               }}

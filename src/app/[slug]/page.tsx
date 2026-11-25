@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowRight, Check, ChevronRight, MessageCircle, ShieldCheck } from 'lucide-react';
@@ -24,9 +25,9 @@ export async function generateMetadata(props: PageProps<'/[slug]'>) {
 }
 
 const steps = {
-  pf: [
+  pf: (comparisonText = `Cotamos com até ${SITE.stats.insurers}+ seguradoras e filtramos as melhores para o seu perfil.`) => [
     { title: 'Conte o que precisa', text: 'Responda duas perguntas rápidas. Leva menos de um minuto.' },
-    { title: 'Comparamos o mercado', text: `Cotamos com até ${SITE.stats.insurers}+ seguradoras e filtramos as melhores para o seu perfil.` },
+    { title: 'Comparamos o mercado', text: comparisonText },
     { title: 'Você escolhe e contrata', text: 'Explicamos as diferenças em linguagem simples e cuidamos da contratação.' },
   ],
   pj: [
@@ -43,7 +44,15 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
 
   const cat = getCategory(p.category);
   const related = relatedProducts(p);
-  const flow = p.audience === 'pj' ? steps.pj : steps.pf;
+  const { image: heroImage } = p.hero;
+  const comparison = p.quoteComparison;
+  const guide = p.comparisonGuide;
+  const flow = p.audience === 'pj' ? steps.pj : steps.pf(comparison?.description);
+  const highlights = [
+    'Cotação sem custo',
+    comparison?.label ?? `${SITE.stats.insurers}+ seguradoras`,
+    'Atendimento no WhatsApp',
+  ];
   const isFinance = p.category === "financeiro";
   const wa = whatsappUrl(`Olá! Quero tirar uma dúvida sobre ${p.name}.`);
 
@@ -60,10 +69,18 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
       <JsonLd data={faqLd(p.faq)} />
 
       {/* HERO + FORMULÁRIO */}
-      <section className="mesh grain relative overflow-hidden pt-28 pb-16 text-white lg:pt-36 lg:pb-24">
-        <div className="grid-lines pointer-events-none absolute inset-0" aria-hidden="true" />
-        <div className="relative mx-auto grid max-w-7xl items-start gap-12 px-4 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:px-8">
-          <div className="lg:pt-6">
+      <section
+        className={`relative isolate overflow-hidden pt-28 pb-16 text-white lg:pt-36 lg:pb-24 ${
+          heroImage ? 'bg-ink-950' : 'mesh grain'
+        }`}
+      >
+        {!heroImage && <div className="grid-lines pointer-events-none absolute inset-0" aria-hidden="true" />}
+        <div
+          className={`relative mx-auto grid max-w-7xl items-start px-4 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:px-8 ${
+            heroImage ? 'gap-6 lg:min-h-[28rem]' : 'gap-12'
+          }`}
+        >
+          <div className="relative z-10 lg:pt-6">
             <nav aria-label="Você está em" className="flex flex-wrap items-center gap-1.5 text-sm text-white/50">
               <Link href="/" className="hover:text-white">
                 Início
@@ -81,7 +98,7 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
             <h1 className="display mt-5 text-4xl text-balance sm:text-5xl lg:text-6xl">{p.hero.title}</h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/70">{p.hero.subtitle}</p>
             <ul className="mt-8 grid gap-3 text-sm font-medium text-white/85 sm:grid-cols-3">
-              {['Cotação sem custo', `${SITE.stats.insurers}+ seguradoras`, 'Atendimento no WhatsApp'].map((t) => (
+              {highlights.map((t) => (
                 <li key={t} className="flex items-center gap-2">
                   <span className="grid size-5 place-items-center rounded-full bg-volt-500 text-ink-900">
                     <Check className="size-3.5" strokeWidth={3} aria-hidden="true" />
@@ -91,7 +108,24 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
               ))}
             </ul>
           </div>
-          <div id="cotacao" className="scroll-mt-28">
+          {heroImage && (
+            <div
+              className="pointer-events-none relative -mx-4 h-44 overflow-hidden sm:-mx-6 sm:h-56 md:h-64 lg:absolute lg:-top-36 lg:-bottom-24 lg:left-1/2 lg:mx-0 lg:h-auto lg:w-screen lg:-translate-x-1/2"
+              aria-hidden="true"
+            >
+              <Image
+                src={heroImage}
+                alt=""
+                fill
+                preload
+                sizes="100vw"
+                className="object-cover object-[right_75%] motion-safe:animate-[product-hero-settle_1.2s_ease-out_both] lg:object-[center_75%]"
+              />
+              <div className="absolute inset-0 bg-linear-to-b from-ink-950 via-transparent via-35% to-ink-950/90 lg:bg-linear-to-r lg:from-ink-950/95 lg:via-ink-950/45 lg:via-50% lg:to-ink-950/5" />
+              <div className="absolute inset-x-0 top-0 hidden h-36 bg-linear-to-b from-ink-950/85 to-transparent lg:block" />
+            </div>
+          )}
+          <div id="cotacao" className="relative z-10 scroll-mt-28">
             <QuoteForm product={toQuoteProduct(p)} source="product-page" title={`Cotação de ${p.name}`} />
           </div>
         </div>
@@ -155,6 +189,21 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
               </div>
             ))}
           </div>
+          {guide && (
+            <section className="mt-8 rounded-3xl border border-ink-100 bg-white p-6 sm:p-8">
+              <h3 className="display text-2xl text-ink-900 sm:text-3xl">{guide.title}</h3>
+              <ul className="mt-5 grid gap-x-8 gap-y-4 sm:grid-cols-2">
+                {guide.items.map((item) => (
+                  <li key={item.title} className="leading-relaxed text-ink-500">
+                    <strong className="text-ink-900">{item.title}.</strong> {item.text}
+                  </li>
+                ))}
+              </ul>
+              <Link href={guide.article.href} className="mt-6 inline-flex items-center gap-2 font-semibold text-brand-700 underline underline-offset-4 hover:text-ink-900">
+                {guide.article.label} <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
+              </Link>
+            </section>
+          )}
         </div>
       </section>
 

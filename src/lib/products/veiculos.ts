@@ -9,14 +9,32 @@ export const veiculos: Product[] = [
     short: 'Colisão, roubo, terceiros e assistência 24h com preço comparado.',
     icon: 'car',
     popular: true,
-    metaTitle: 'Seguro Auto: cotação online comparando 15+ seguradoras',
+    metaTitle: 'Cotação de seguro auto online',
     metaDescription:
-      'Cote seu seguro auto em minutos. Comparamos coberturas e preços entre as principais seguradoras: roubo, colisão, terceiros, carro reserva e assistência 24h.',
+      'Compare cotações de seguro auto para o seu perfil. Confira opções de cobertura para roubo, colisão, terceiros e assistência 24h.',
     hero: {
       eyebrow: 'Seguro Auto',
-      title: 'Seu carro protegido pelo melhor preço do mercado',
+      title: 'Compare cotações de seguro auto',
       subtitle:
-        'Uma cotação, várias seguradoras. Você recebe as opções lado a lado e escolhe a que cabe no bolso — sem abrir mão de cobertura.',
+        'Compare preços, coberturas e franquias para o seu perfil. Receba as opções pelo WhatsApp e tire dúvidas com a Fast Secure.',
+      image: '/images/products/seguro-auto-hero.webp',
+    },
+    quoteComparison: {
+      label: 'Coberturas lado a lado',
+      description: 'Reunimos opções de seguradoras para você comparar preços, coberturas e franquias para o seu perfil.',
+    },
+    comparisonGuide: {
+      title: 'O que comparar na cotação de seguro auto',
+      items: [
+        { title: 'Franquia', text: 'Confira o valor da sua participação e em quais situações ele se aplica.' },
+        { title: 'Danos a terceiros', text: 'Compare os limites para danos materiais e corporais em cada proposta.' },
+        { title: 'Assistência 24h', text: 'Confira os serviços disponíveis, a distância de guincho e os limites de utilização.' },
+        { title: 'Coberturas adicionais', text: 'Veja quais opções, como carro reserva ou proteção para vidros, entram no preço.' },
+      ],
+      article: {
+        href: '/blog/o-que-muda-o-preco-do-seguro-auto',
+        label: 'Veja o que muda o preço do seguro auto',
+      },
     },
     pains: [
       { title: 'Roubo ou furto', text: 'Sem seguro, o prejuízo é o valor inteiro do carro — e o financiamento continua.' },
