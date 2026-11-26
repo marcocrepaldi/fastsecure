@@ -3,10 +3,12 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowRight, ChevronRight, MessageCircle } from 'lucide-react';
 import { PostCard, PostMetaLine } from '@/components/blog';
+import HeroBackdrop from '@/components/HeroBackdrop';
 import JsonLd from '@/components/JsonLd';
 import QuoteForm, { type ProductOptionGroup } from '@/components/QuoteForm';
 import { ProductCard, SectionHeading, toQuoteProduct } from '@/components/ui';
 import { formatDate, getPost, postProducts, publishedPosts, relatedPosts } from '@/lib/blog';
+import { articleHeroImages } from '@/lib/editorial';
 import { categories, getCategory, productsIn } from '@/lib/products';
 import { blogPostingLd, breadcrumbLd, buildMetadata, faqLd, postDateTime } from '@/lib/seo';
 import { whatsappUrl } from '@/lib/site';
@@ -48,6 +50,7 @@ export default async function BlogPostPage(props: PageProps<'/blog/[slug]'>) {
   const cat = getCategory(post.category);
   const linked = postProducts(post);
   const main = linked[0];
+  const heroImage = articleHeroImages[post.slug] ?? main?.hero.image;
   const related = relatedPosts(post);
   const toc = post.headings.filter((h) => h.level === 2);
   const source = `blog:${post.slug}`.slice(0, 60);
@@ -65,8 +68,10 @@ export default async function BlogPostPage(props: PageProps<'/blog/[slug]'>) {
       />
       {post.faq.length > 0 && <JsonLd data={faqLd(post.faq)} />}
 
-      <section className="mesh grain relative overflow-hidden pt-28 pb-14 text-white lg:pt-36 lg:pb-20">
-        <div className="grid-lines pointer-events-none absolute inset-0" aria-hidden="true" />
+      <section className={`relative overflow-hidden pt-28 pb-14 text-white lg:pt-36 lg:pb-20 ${heroImage ? 'bg-ink-950' : 'mesh grain'}`}>
+        {heroImage
+          ? <HeroBackdrop src={heroImage} preload={!post.cover} />
+          : <div className="grid-lines pointer-events-none absolute inset-0" aria-hidden="true" />}
         <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <nav aria-label="Você está em" className="flex flex-wrap items-center gap-1.5 text-sm text-white/50">
             <Link href="/" className="hover:text-white">

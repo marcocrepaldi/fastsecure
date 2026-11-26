@@ -1,8 +1,9 @@
 ---
 title: Seguro de vida: como calcular o capital segurado ideal
-description: Um método simples para definir quanto de seguro de vida contratar, somando dívidas, despesas da família e objetivos, e descontando reservas.
+description: Calcule o capital do seguro de vida com um exemplo que soma dívidas, despesas e objetivos da família e desconta as reservas disponíveis.
 coverAlt: Casal organiza o orçamento da família à mesa enquanto o filho faz a lição ao fundo.
 date: 2026-11-25
+updated: 2026-11-26
 category: vida
 products: [seguro-de-vida, seguro-doencas-graves, seguro-dit]
 tags: [seguro de vida, capital segurado, planejamento familiar, sucessão]
@@ -12,7 +13,7 @@ A pergunta mais comum de quem pensa em seguro de vida é: **quanto contratar?** 
 
 ## Para que serve o capital segurado
 
-O capital segurado é o valor pago aos beneficiários se acontecer o evento coberto. Ele existe para que a família consiga **manter o padrão de vida por um período**, quitar compromissos e seguir com planos importantes, como a educação dos filhos, enquanto se reorganiza.
+O capital segurado é o valor previsto para uma cobertura. Em caso de morte coberta, a indenização é destinada aos beneficiários conforme o contrato. Ele existe para que a família consiga **manter o padrão de vida por um período**, quitar compromissos e seguir com planos importantes, como a educação dos filhos, enquanto se reorganiza.
 
 ## O método em quatro passos
 
@@ -22,7 +23,7 @@ Inclua financiamentos de imóvel e veículo, empréstimos e outros compromissos 
 
 ### 2. Calcule a renda que precisa ser reposta
 
-Multiplique o custo mensal da família pelo número de meses que você quer garantir. Uma referência comum é cobrir de **2 a 5 anos** de despesas, tempo para a família se reorganizar.
+Multiplique o custo mensal da família pelo número de meses que você quer garantir. Escolha o período com base nas despesas e no tempo de que a família precisaria para se reorganizar.
 
 ### 3. Acrescente os objetivos
 
@@ -30,11 +31,11 @@ Educação dos filhos até a faculdade, despesas com inventário e qualquer outr
 
 ### 4. Desconte as reservas
 
-Subtraia investimentos, previdência e outros seguros de vida que você já tem — inclusive o seguro de vida em grupo da empresa, se houver.
+Subtraia as reservas disponíveis para esse objetivo e os capitais de outras apólices aplicáveis. Confira a vigência e os critérios de permanência no seguro em grupo antes de contar com ele.
 
 ## Um exemplo para visualizar
 
-Os números abaixo são **apenas ilustrativos**:
+O exemplo considera despesas que não foram somadas nos demais itens. A renda a repor é de R$ 8 mil por mês durante 36 meses.
 
 | Item | Valor |
 |---|---|
@@ -57,7 +58,7 @@ O seguro de vida pode incluir coberturas adicionais que protegem **você** em vi
 
 ## Uma vantagem pouco conhecida
 
-Pelo Código Civil (art. 794), o capital do seguro de vida **não é considerado herança** e não responde pelas dívidas do segurado. Ele vai direto para os beneficiários indicados na apólice, sem depender do inventário — o que dá liquidez justamente no momento em que a família mais precisa.
+O capital devido por morte **não é considerado herança**. Em caso de sinistro coberto, a seguradora paga aos beneficiários conforme as regras de indicação e a documentação exigida. [Lei do Contrato de Seguro, art. 116](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/lei/l15040.htm)
 
 ## Quando revisar o valor
 
@@ -67,7 +68,7 @@ Revise o capital sempre que a vida mudar: casamento, nascimento de filho, compra
 
 ### O seguro de vida entra no inventário?
 
-Não. O capital segurado é pago diretamente aos beneficiários indicados e não é considerado herança, conforme o art. 794 do Código Civil.
+O capital devido por morte é tratado à parte do inventário. A Lei 15.040/2024 estabelece no art. 116 que esse capital não integra a herança.
 
 ### Posso escolher quem recebe o seguro?
 
@@ -75,6 +76,6 @@ Sim. Você indica os beneficiários e os percentuais de cada um, e pode alterar 
 
 ### Já tenho seguro de vida pela empresa. Preciso de outro?
 
-Depende do valor. O seguro em grupo da empresa costuma ter capital limitado e termina quando você sai do emprego. Some esse valor às suas reservas no cálculo e veja se há diferença a cobrir.
+Depende do valor. Confira o capital e as regras de permanência do seguro em grupo da empresa, inclusive após o fim do vínculo. Some esse valor às suas reservas no cálculo e veja se há diferença a cobrir.
 
-Quer saber quanto custa o capital certo para a sua família? Faça a [cotação de seguro de vida](/seguro-de-vida) na Fast Secure: comparamos as seguradoras e mostramos as opções pelo WhatsApp.
+Quer saber quanto custa o capital certo para a sua família? Faça a [cotação de seguro de vida](/seguro-de-vida#cotacao) na Fast Secure: comparamos as seguradoras e mostramos as opções pelo WhatsApp.

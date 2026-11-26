@@ -8,6 +8,7 @@ import QuoteForm from '@/components/QuoteForm';
 import AutoQuoteForm from '@/components/AutoQuoteForm';
 import { FaqList, ProductCard, SectionHeading, toQuoteProduct } from '@/components/ui';
 import { getCategory, getProduct, products, relatedProducts } from '@/lib/products';
+import type { Product } from '@/lib/products/types';
 import { breadcrumbLd, buildMetadata, faqLd, serviceLd } from '@/lib/seo';
 import { SITE, whatsappUrl } from '@/lib/site';
 
@@ -34,10 +35,15 @@ const steps = {
     { title: 'Comparamos o mercado', text: comparisonText },
     { title: 'Você escolhe e contrata', text: 'Explicamos as diferenças em linguagem simples e cuidamos da contratação.' },
   ],
-  pj: [
-    { title: 'Diagnóstico', text: 'Entendemos a operação, os contratos e os riscos da sua empresa.' },
-    { title: 'Cotação comparativa', text: 'Negociamos com as seguradoras e apresentamos as opções lado a lado.' },
-    { title: 'Implantação e gestão', text: 'Emitimos a apólice e acompanhamos sinistros e renovações.' },
+  pj: (comparison?: Product['quoteComparison']) => [
+    { title: 'Diagnóstico', text: comparison?.requestText ?? 'Entendemos a operação, os contratos e os riscos da sua empresa.' },
+    { title: 'Cotação comparativa', text: comparison?.description ?? 'Negociamos com as seguradoras e apresentamos as opções lado a lado.' },
+    {
+      title: 'Implantação e gestão',
+      text: comparison?.nextStepText ?? (comparison
+        ? 'Orientamos a contratação e acompanhamos a apólice e sua renovação.'
+        : 'Emitimos a apólice e acompanhamos sinistros e renovações.'),
+    },
   ],
 };
 
@@ -54,7 +60,7 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
   const guide = p.comparisonGuide;
   const isAutoQuote = p.slug === 'seguro-auto';
   const flow = p.audience === 'pj'
-    ? steps.pj
+    ? steps.pj(comparison)
     : steps.pf(
         comparison?.description,
         isAutoQuote ? 'Informe os dados do carro, de quem mais dirige e seu contato.' : comparison?.requestText,
@@ -64,7 +70,7 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
     comparison?.label ?? `${SITE.stats.insurers}+ seguradoras`,
     'Atendimento no WhatsApp',
   ];
-  const isFinance = p.category === "financeiro";
+  const isFinance = p.category === 'financeiro';
   const wa = whatsappUrl(`Olá! Quero tirar uma dúvida sobre ${p.name}.`);
 
   return (
@@ -185,7 +191,7 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
       <section className="bg-ink-50 py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-            <SectionHeading eyebrow={isFinance ? "Vantagens" : "Coberturas"} title={`${p.name}: o que está incluído`} />
+            <SectionHeading eyebrow={p.coverageTitle ? 'Comparação' : isFinance ? 'Vantagens' : 'Coberturas'} title={p.coverageTitle ?? `${p.name}: o que está incluído`} />
             <p className="max-w-sm text-sm text-ink-400" data-reveal>
               {p.coverageDescription ?? (isFinance
                 ? "Regras, prazos e taxas variam conforme a administradora e o plano. Na simulação, mostramos tudo lado a lado."
@@ -208,6 +214,11 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
               </div>
             ))}
           </div>
+          {p.coverageSource && (
+            <Link href={p.coverageSource.href} className="mt-7 inline-flex items-center gap-2 font-semibold text-brand-700 underline underline-offset-4 hover:text-ink-900">
+              {p.coverageSource.label} <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
+            </Link>
+          )}
           {guide && (
             <section className="mt-8 rounded-3xl border border-ink-100 bg-white p-6 sm:p-8">
               <h3 className="display text-2xl text-ink-900 sm:text-3xl">{guide.title}</h3>
@@ -245,7 +256,7 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
           </div>
           <div className="rounded-4xl border border-ink-100 p-8 sm:p-12" data-reveal style={{ ['--d' as string]: 1 }}>
             <p className="eyebrow text-brand-600">Como funciona</p>
-            <h2 className="display mt-3 text-3xl sm:text-4xl">Três passos, zero burocracia</h2>
+            <h2 className="display mt-3 text-3xl sm:text-4xl">{p.coverageTitle ? 'Como pedir sua cotação' : 'Três passos, zero burocracia'}</h2>
             <ol className="mt-8 space-y-6">
               {flow.map((s, i) => (
                 <li key={s.title} className="flex gap-5">
@@ -289,7 +300,10 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
       {related.length > 0 && (
         <section className="py-20 lg:py-28">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading eyebrow="Combine proteções" title="Quem contrata este também procura" />
+            <SectionHeading
+              eyebrow={p.coverageTitle ? 'Veja também' : 'Combine proteções'}
+              title={p.slug === 'consorcios' ? 'Compare as modalidades de consórcio' : p.coverageTitle ? 'Produtos relacionados' : 'Quem contrata este também procura'}
+            />
             <div className="mt-12 grid gap-4 sm:grid-cols-3">
               {related.map((r, i) => (
                 <ProductCard key={r.slug} p={r} i={i} />
@@ -307,7 +321,11 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
         >
           <div>
             <h2 className="display text-3xl sm:text-5xl">Pronto para a sua cotação de {p.name}?</h2>
-            <p className="mt-3 text-lg text-ink-700">Leva menos de um minuto. Sem custo e sem compromisso.</p>
+            <p className="mt-3 text-lg text-ink-700">
+              {p.coverageTitle
+                ? 'Conte o que precisa e receba orientação sobre as opções. Sem custo e sem compromisso.'
+                : 'Leva menos de um minuto. Sem custo e sem compromisso.'}
+            </p>
           </div>
           <a href="#cotacao" className="btn shrink-0 bg-ink-900 px-7 py-4 text-base text-white hover:bg-ink-800">
             Quero minha cotação <ArrowRight className="size-5" aria-hidden="true" />

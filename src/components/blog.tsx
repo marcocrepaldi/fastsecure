@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ArrowUpRight, Clock } from 'lucide-react';
 import { formatDate, type PostMeta } from '@/lib/blog';
 import { getCategory } from '@/lib/products';
+import HeroBackdrop from './HeroBackdrop';
 
 export function PostMetaLine({ p, dark = false }: { p: PostMeta; dark?: boolean }) {
   return (
@@ -93,14 +94,31 @@ export function CategoryNav({ items, active }: { items: { id: string; name: stri
   );
 }
 
-export function BlogHero({ eyebrow, title, text }: { eyebrow: string; title: string; text: string }) {
+export function BlogHero({ eyebrow, title, text, image }: {
+  eyebrow: string;
+  title: string;
+  text: string;
+  image?: string;
+}) {
   return (
-    <section className="mesh grain relative overflow-hidden pt-32 pb-16 text-white lg:pt-40 lg:pb-20">
-      <div className="grid-lines absolute inset-0" aria-hidden="true" />
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section
+      className={`relative overflow-hidden text-white ${
+        image
+          ? 'flex min-h-[32rem] items-end bg-ink-950 pt-52 pb-9 md:min-h-[30rem] md:items-center md:pt-32 md:pb-16 lg:min-h-[32rem]'
+          : 'mesh grain pt-32 pb-16 lg:pt-40 lg:pb-20'
+      }`}
+    >
+      {image ? (
+        <HeroBackdrop src={image} />
+      ) : (
+        <div className="grid-lines absolute inset-0" aria-hidden="true" />
+      )}
+      <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <p className="eyebrow text-volt-500">{eyebrow}</p>
-        <h1 className="display mt-3 max-w-3xl text-5xl sm:text-6xl">{title}</h1>
-        <p className="mt-5 max-w-2xl text-lg text-white/65">{text}</p>
+        <h1 className={`display mt-3 ${image ? 'max-w-xl text-4xl sm:text-5xl lg:text-6xl' : 'max-w-3xl text-5xl sm:text-6xl'}`}>
+          {title}
+        </h1>
+        <p className={`mt-5 text-lg ${image ? 'max-w-lg text-white/85' : 'max-w-2xl text-white/65'}`}>{text}</p>
       </div>
     </section>
   );

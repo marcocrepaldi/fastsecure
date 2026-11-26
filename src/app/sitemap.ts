@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { blogCategories, publishedPosts } from '@/lib/blog';
+import { blogCategories, postsInCategory, publishedPosts } from '@/lib/blog';
 import { products } from '@/lib/products';
 import { postDateTime } from '@/lib/seo';
 import { SITE } from '@/lib/site';
@@ -9,13 +9,14 @@ export const revalidate = 3600;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
+  const photoReviewDate = '2026-11-26';
   const posts = publishedPosts();
   return [
     { url: SITE.url, lastModified: now, changeFrequency: 'weekly', priority: 1 },
-    { url: `${SITE.url}/produtos`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${SITE.url}/produtos`, lastModified: photoReviewDate, changeFrequency: 'weekly', priority: 0.9 },
     ...products.map((p) => ({
       url: `${SITE.url}/${p.slug}`,
-      lastModified: now,
+      lastModified: p.coverageTitle ? photoReviewDate : now,
       changeFrequency: 'monthly' as const,
       priority: p.popular ? 0.9 : 0.8,
     })),
@@ -27,7 +28,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     ...blogCategories().map((c) => ({
       url: `${SITE.url}/blog/categoria/${c.id}`,
-      lastModified: now,
+      lastModified: postsInCategory(c.id).reduce((latest, post) => {
+        const date = post.updated ?? post.date;
+        return date > latest ? date : latest;
+      }, photoReviewDate),
       changeFrequency: 'weekly' as const,
       priority: 0.5,
     })),
@@ -37,6 +41,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     })),
-    { url: `${SITE.url}/privacidade`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${SITE.url}/privacidade`, lastModified: photoReviewDate, changeFrequency: 'yearly', priority: 0.2 },
   ];
 }

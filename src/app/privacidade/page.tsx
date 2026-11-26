@@ -1,59 +1,46 @@
+import HeroBackdrop from '@/components/HeroBackdrop';
+import { privacyPage } from '@/lib/editorial';
 import { buildMetadata } from '@/lib/seo';
 import { SITE } from '@/lib/site';
 
 export const metadata = buildMetadata({
-  title: 'Política de Privacidade',
-  description: 'Como a Fast Secure coleta, usa e protege os dados pessoais enviados pelo site, conforme a LGPD.',
+  title: privacyPage.title,
+  description: privacyPage.description,
   path: '/privacidade',
 });
 
-// ⚠️ Texto-base. Revisar com o jurídico/DPO antes do go-live.
 const sections: { title: string; body: string[] }[] = [
-  {
-    title: '1. Quem somos',
-    body: [
-      `${SITE.legalName} ("Fast Secure") é a controladora dos dados pessoais coletados neste site. Dúvidas sobre privacidade podem ser enviadas para ${SITE.email}.`,
-    ],
-  },
   {
     title: '2. Quais dados coletamos',
     body: [
-      'Dados que você informa nos formulários: nome, telefone/WhatsApp, e-mail (opcional), nome da empresa (em cotações corporativas), o produto de interesse e a resposta à pergunta de qualificação.',
+      'Os formulários pedem nome, WhatsApp com DDD e, se você informar, e-mail. Conforme o formulário, coletamos o produto de interesse, a resposta sobre o seu perfil, ou informações sobre a empresa.',
       'Na página de Seguro Auto, pedimos a placa ou a marca, o modelo, a versão e o ano-modelo para identificar o veículo. Usamos o CEP de pernoite, o tipo de uso e a data de nascimento do principal condutor para avaliar o perfil de risco. A indicação de seguro novo ou renovação ajuda a identificar um possível bônus.',
-      'Dados de navegação: página de origem do contato, parâmetros de campanha (UTM) e site de referência, usados para entender como você chegou até nós.',
+      'O pedido pode incluir a página de origem, o site de referência e identificadores da campanha usados para entender como você chegou até nós. Em produção, o site usa o Google Analytics para medir navegação e interações.',
     ],
   },
   {
     title: '3. Para que usamos',
     body: [
       'Para elaborar e enviar a cotação solicitada, entrar em contato pelo WhatsApp, telefone ou e-mail e intermediar a contratação junto às seguradoras e operadoras.',
-      'A base legal é o procedimento preliminar a um contrato solicitado por você (art. 7º, V, da LGPD) e, quando aplicável, o nosso legítimo interesse em melhorar o atendimento.',
+      'Para preparar uma cotação solicitada por você, tratamos os dados necessários aos procedimentos preliminares à contratação, conforme o art. 7º, V, da LGPD. Para medir e melhorar o atendimento, podemos usar dados com base no legítimo interesse, quando aplicável.',
     ],
   },
   {
     title: '4. Com quem compartilhamos',
     body: [
-      'Com seguradoras, operadoras de saúde e administradoras de consórcio necessárias para a cotação e a contratação, e com fornecedores de tecnologia que nos ajudam a operar o site e o atendimento. Não vendemos dados pessoais.',
+      'Compartilhamos os dados necessários com seguradoras, operadoras de saúde, administradoras de consórcio e outras instituições envolvidas no produto solicitado. Fornecedores de hospedagem, medição, automação e atendimento também podem tratar dados para operar o site e encaminhar o pedido à corretora.',
     ],
   },
   {
     title: '5. Por quanto tempo guardamos',
     body: [
-      'Pelo tempo necessário para atender à sua solicitação e cumprir obrigações legais e regulatórias aplicáveis à corretagem de seguros.',
+      'O prazo depende da finalidade da coleta e das obrigações aplicáveis. Mantemos os dados pelo tempo necessário para tratar o pedido, prestar o atendimento e cumprir obrigações legais e regulatórias.',
     ],
   },
   {
-    title: '6. Seus direitos',
+    title: '6. Segurança',
     body: [
-      'Você pode pedir a confirmação do tratamento, acesso, correção, anonimização, portabilidade ou eliminação dos seus dados, além de revogar consentimentos, pelo e-mail ' +
-        SITE.email +
-        '.',
-    ],
-  },
-  {
-    title: '7. Segurança',
-    body: [
-      'Adotamos medidas técnicas e administrativas para proteger os dados contra acessos não autorizados, como conexão criptografada (HTTPS) e acesso restrito às informações.',
+      'O site usa conexão criptografada (HTTPS). Os pedidos são encaminhados aos canais de atendimento para avaliação pela corretora.',
     ],
   },
 ];
@@ -61,13 +48,23 @@ const sections: { title: string; body: string[] }[] = [
 export default function PrivacidadePage() {
   return (
     <main>
-      <section className="mesh grain relative overflow-hidden pt-32 pb-14 text-white lg:pt-40">
+      <section className="relative overflow-hidden bg-ink-950 pt-40 pb-16 text-white lg:pt-44">
+        <HeroBackdrop src={privacyPage.image} />
         <div className="relative mx-auto max-w-3xl px-4 sm:px-6">
-          <p className="eyebrow text-volt-500">LGPD</p>
-          <h1 className="display mt-3 text-5xl">Política de Privacidade</h1>
+          <p className="eyebrow text-volt-500">{privacyPage.eyebrow}</p>
+          <h1 className="display mt-3 text-5xl">{privacyPage.heading}</h1>
+          <p className="mt-5 max-w-lg text-lg text-white/85">{privacyPage.description}</p>
         </div>
       </section>
       <article className="mx-auto max-w-3xl space-y-10 px-4 py-16 sm:px-6">
+        <section>
+          <h2 className="text-xl font-bold">1. Quem somos</h2>
+          <p className="mt-3 leading-relaxed text-ink-600">
+            {SITE.legalName} é a controladora dos dados pessoais tratados por meio deste site. Nosso endereço é{' '}
+            {SITE.address.street}, {SITE.address.neighborhood}, {SITE.address.city} – {SITE.address.region}, CEP{' '}
+            {SITE.address.postalCode}.
+          </p>
+        </section>
         {sections.map((s) => (
           <section key={s.title}>
             <h2 className="text-xl font-bold">{s.title}</h2>
@@ -78,6 +75,19 @@ export default function PrivacidadePage() {
             ))}
           </section>
         ))}
+        <section>
+          <h2 className="text-xl font-bold">7. Seus direitos e como falar com a corretora</h2>
+          <p className="mt-3 leading-relaxed text-ink-600">
+            Solicite confirmação de tratamento, acesso, correção ou outros direitos previstos na LGPD pelo e-mail{' '}
+            <a href={`mailto:${SITE.email}`} className="font-semibold text-brand-700 underline underline-offset-4">{SITE.email}</a>.
+            A portabilidade, eliminação e revogação de consentimento se aplicam conforme a situação.
+          </p>
+          <p className="mt-3 text-ink-600">
+            <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" className="font-semibold text-brand-700 underline underline-offset-4">
+              Consultar a Lei Geral de Proteção de Dados
+            </a>
+          </p>
+        </section>
       </article>
     </main>
   );
