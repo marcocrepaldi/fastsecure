@@ -22,12 +22,14 @@ export type Product = {
   metaTitle: string;
   metaDescription: string;
   hero: { eyebrow: string; title: string; subtitle: string; image?: string };
-  quoteComparison?: { label: string; description: string };
+  quoteComparison?: { label: string; description: string; requestText?: string };
   comparisonGuide?: { title: string; items: Item[]; article: { href: string; label: string } };
-  /** O que acontece sem a proteção (3 itens). */
+  openingSection?: { eyebrow: string; title: string };
+  /** O que acontece sem a proteção ou o que comparar (3 itens). */
   pains: Item[];
   /** Principais coberturas (6 itens). */
   coverages: Item[];
+  coverageDescription?: string;
   /** Para quem é (4 itens). */
   forWho: string[];
   /** Pergunta de qualificação do formulário (vira um campo de escolha). */

@@ -50,11 +50,15 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
   const related = relatedProducts(p);
   const { image: heroImage } = p.hero;
   const comparison = p.quoteComparison;
+  const opening = p.openingSection;
   const guide = p.comparisonGuide;
   const isAutoQuote = p.slug === 'seguro-auto';
   const flow = p.audience === 'pj'
     ? steps.pj
-    : steps.pf(comparison?.description, isAutoQuote ? 'Informe os dados do carro, de quem mais dirige e seu contato.' : undefined);
+    : steps.pf(
+        comparison?.description,
+        isAutoQuote ? 'Informe os dados do carro, de quem mais dirige e seu contato.' : comparison?.requestText,
+      );
   const highlights = [
     'Cotação sem custo',
     comparison?.label ?? `${SITE.stats.insurers}+ seguradoras`,
@@ -140,15 +144,17 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
         </div>
       </section>
 
-      {/* DORES */}
+      {/* PONTOS DE ATENÇÃO */}
       <section className="py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            eyebrow="O risco"
+            eyebrow={opening?.eyebrow ?? 'O risco'}
             title={
-              <>
-                Sem proteção, <span className="text-brand-500">quem paga a conta é você</span>
-              </>
+              opening?.title ?? (
+                <>
+                  Sem proteção, <span className="text-brand-500">quem paga a conta é você</span>
+                </>
+              )
             }
           />
           <div className="mt-12 grid gap-5 md:grid-cols-3">
@@ -159,11 +165,15 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
                 style={{ ['--d' as string]: i }}
                 className="relative overflow-hidden rounded-3xl bg-ink-900 p-8 text-white"
               >
-                <span className="display absolute -top-4 -right-2 text-[7rem] leading-none text-white/[0.04]" aria-hidden="true">
-                  0{i + 1}
-                </span>
-                <span className="eyebrow text-volt-500">Risco 0{i + 1}</span>
-                <h3 className="mt-4 text-xl font-bold">{pain.title}</h3>
+                {!opening && (
+                  <>
+                    <span className="display absolute -top-4 -right-2 text-[7rem] leading-none text-white/[0.04]" aria-hidden="true">
+                      0{i + 1}
+                    </span>
+                    <span className="eyebrow text-volt-500">Risco 0{i + 1}</span>
+                  </>
+                )}
+                <h3 className={`text-xl font-bold ${opening ? 'text-volt-500' : 'mt-4'}`}>{pain.title}</h3>
                 <p className="mt-2 leading-relaxed text-white/60">{pain.text}</p>
               </article>
             ))}
@@ -177,9 +187,9 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
           <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
             <SectionHeading eyebrow={isFinance ? "Vantagens" : "Coberturas"} title={`${p.name}: o que está incluído`} />
             <p className="max-w-sm text-sm text-ink-400" data-reveal>
-              {isFinance
+              {p.coverageDescription ?? (isFinance
                 ? "Regras, prazos e taxas variam conforme a administradora e o plano. Na simulação, mostramos tudo lado a lado."
-                : "Coberturas, limites e carências variam conforme a seguradora e o plano. Na cotação, mostramos tudo lado a lado."}
+                : "Coberturas, limites e carências variam conforme a seguradora e o plano. Na cotação, mostramos tudo lado a lado.")}
             </p>
           </div>
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
