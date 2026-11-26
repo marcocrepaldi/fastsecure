@@ -19,6 +19,7 @@ const sections: { title: string; body: string[] }[] = [
     title: '2. Quais dados coletamos',
     body: [
       'Dados que você informa nos formulários: nome, telefone/WhatsApp, e-mail (opcional), nome da empresa (em cotações corporativas), o produto de interesse e a resposta à pergunta de qualificação.',
+      'Na página de Seguro Auto, pedimos a placa ou a marca, o modelo, a versão e o ano-modelo para identificar o veículo. Usamos o CEP de pernoite, o tipo de uso e a data de nascimento do principal condutor para avaliar o perfil de risco. A indicação de seguro novo ou renovação ajuda a identificar um possível bônus.',
       'Dados de navegação: página de origem do contato, parâmetros de campanha (UTM) e site de referência, usados para entender como você chegou até nós.',
     ],
   },

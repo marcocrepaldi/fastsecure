@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { ArrowLeft, ArrowRight, CircleCheck, Lock, LoaderCircle, MessageCircle } from 'lucide-react';
+import { maskPhone, useLeadSubmission } from './useLeadSubmission';
 
 export type QuoteProduct = {
   slug: string;
@@ -25,34 +26,12 @@ type Props = {
   b2b?: boolean;
 };
 
-function maskPhone(v: string) {
-  const d = v.replace(/\D/g, '').slice(0, 11);
-  if (d.length <= 2) return d.length ? `(${d}` : '';
-  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
-  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
-  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
-}
-
-function trackingData() {
-  const params = new URLSearchParams(window.location.search);
-  const utm: Record<string, string> = {};
-  for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid']) {
-    const v = params.get(k);
-    if (v) utm[k] = v.slice(0, 200);
-  }
-  return { page: window.location.pathname, referrer: document.referrer.slice(0, 300), utm };
-}
-
 export default function QuoteForm({ product, productOptions, source, title, subtitle, b2b = false }: Props) {
   const [step, setStep] = useState<1 | 2>(1);
   const [selected, setSelected] = useState(product?.slug ?? '');
   const [answer, setAnswer] = useState('');
   const [phone, setPhone] = useState('');
-  const [status, setStatus] = useState<'idle' | 'sending' | 'received' | 'whatsapp'>('idle');
-  const [error, setError] = useState<string | null>(null);
-  const [waUrl, setWaUrl] = useState<string | null>(null);
-  const attempt = useRef<{ payload: string; leadId: string } | null>(null);
-  const submitting = useRef(false);
+  const { status, error, waUrl, send } = useLeadSubmission(source);
 
   const productName =
     product?.name ?? productOptions?.flatMap((g) => g.items).find((i) => i.slug === selected)?.name ?? '';
@@ -60,54 +39,21 @@ export default function QuoteForm({ product, productOptions, source, title, subt
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (submitting.current) return;
-    submitting.current = true;
-    setError(null);
-    setWaUrl(null);
     const fd = new FormData(e.currentTarget);
-    setStatus('sending');
-    try {
-      const payload = {
-        name: fd.get('name'),
-        phone,
-        email: fd.get('email'),
-        company: fd.get('company'),
-        website: fd.get('website'),
-        product: productName,
-        productSlug: selected,
-        question: product?.question.label,
-        answer,
-        source,
-        ...trackingData(),
-      };
-      const serialized = JSON.stringify(payload);
-      if (attempt.current?.payload !== serialized) {
-        attempt.current = { payload: serialized, leadId: crypto.randomUUID() };
-      }
-
-      const res = await fetch('/api/lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...payload, leadId: attempt.current.leadId }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (typeof data.whatsappUrl === 'string') setWaUrl(data.whatsappUrl);
-      if (!res.ok || !data.ok) throw new Error(data.error || 'Não foi possível enviar. Tente novamente.');
-
-      if (data.delivery === 'received') {
-        setStatus('received');
-        const w = window as unknown as { dataLayer?: object[] };
-        w.dataLayer?.push({ event: 'generate_lead', product: selected || productName, source });
-      } else if (data.delivery === 'whatsapp' && typeof data.whatsappUrl === 'string') {
-        setStatus('whatsapp');
-      } else {
-        throw new Error('Não conseguimos confirmar o recebimento. Tente novamente.');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro inesperado.');
-      setStatus('idle');
-    } finally {
-      submitting.current = false;
+    const delivery = await send({
+      name: fd.get('name'),
+      phone,
+      email: fd.get('email'),
+      company: fd.get('company'),
+      website: fd.get('website'),
+      product: productName,
+      productSlug: selected,
+      question: product?.question.label,
+      answer,
+    });
+    if (delivery === 'received') {
+      const w = window as unknown as { dataLayer?: object[] };
+      w.dataLayer?.push({ event: 'generate_lead', product: selected || productName, source });
     }
   }
 

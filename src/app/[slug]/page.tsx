@@ -5,6 +5,7 @@ import { ArrowRight, Check, ChevronRight, MessageCircle, ShieldCheck } from 'luc
 import Icon from '@/components/Icon';
 import JsonLd from '@/components/JsonLd';
 import QuoteForm from '@/components/QuoteForm';
+import AutoQuoteForm from '@/components/AutoQuoteForm';
 import { FaqList, ProductCard, SectionHeading, toQuoteProduct } from '@/components/ui';
 import { getCategory, getProduct, products, relatedProducts } from '@/lib/products';
 import { breadcrumbLd, buildMetadata, faqLd, serviceLd } from '@/lib/seo';
@@ -25,8 +26,11 @@ export async function generateMetadata(props: PageProps<'/[slug]'>) {
 }
 
 const steps = {
-  pf: (comparisonText = `Cotamos com até ${SITE.stats.insurers}+ seguradoras e filtramos as melhores para o seu perfil.`) => [
-    { title: 'Conte o que precisa', text: 'Responda duas perguntas rápidas. Leva menos de um minuto.' },
+  pf: (
+    comparisonText = `Cotamos com até ${SITE.stats.insurers}+ seguradoras e filtramos as melhores para o seu perfil.`,
+    requestText = 'Responda duas perguntas rápidas. Leva menos de um minuto.',
+  ) => [
+    { title: 'Conte o que precisa', text: requestText },
     { title: 'Comparamos o mercado', text: comparisonText },
     { title: 'Você escolhe e contrata', text: 'Explicamos as diferenças em linguagem simples e cuidamos da contratação.' },
   ],
@@ -47,7 +51,10 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
   const { image: heroImage } = p.hero;
   const comparison = p.quoteComparison;
   const guide = p.comparisonGuide;
-  const flow = p.audience === 'pj' ? steps.pj : steps.pf(comparison?.description);
+  const isAutoQuote = p.slug === 'seguro-auto';
+  const flow = p.audience === 'pj'
+    ? steps.pj
+    : steps.pf(comparison?.description, isAutoQuote ? 'Informe os dados do carro, de quem mais dirige e seu contato.' : undefined);
   const highlights = [
     'Cotação sem custo',
     comparison?.label ?? `${SITE.stats.insurers}+ seguradoras`,
@@ -126,7 +133,9 @@ export default async function ProductPage(props: PageProps<'/[slug]'>) {
             </div>
           )}
           <div id="cotacao" className="relative z-10 scroll-mt-28">
-            <QuoteForm product={toQuoteProduct(p)} source="product-page" title={`Cotação de ${p.name}`} />
+            {isAutoQuote
+              ? <AutoQuoteForm />
+              : <QuoteForm product={toQuoteProduct(p)} source="product-page" title={`Cotação de ${p.name}`} />}
           </div>
         </div>
       </section>

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { AUTO_QUOTE_SOURCE, autoQuoteNotice, parseAutoQuote } from '@/lib/auto-quote';
 import { whatsappUrl } from '@/lib/site';
 
 type LeadPayload = Partial<
@@ -8,7 +9,7 @@ type LeadPayload = Partial<
     | 'employees' | 'interest' | 'leadId',
     unknown
   >
-> & { utm?: unknown };
+> & { utm?: unknown; autoQuote?: unknown };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LEAD_ID_RE = /^[\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/i;
@@ -49,6 +50,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'O e-mail informado parece inválido.' }, { status: 400 });
   }
 
+  const source = str(data.source, 60);
+  const isAutoQuote = source === AUTO_QUOTE_SOURCE;
+  const autoDetails = isAutoQuote ? parseAutoQuote(data.autoQuote) : null;
+  if (autoDetails?.error) {
+    return NextResponse.json({ ok: false, error: autoDetails.error }, { status: 400 });
+  }
+  const autoQuote = autoDetails?.value;
+
   const utm =
     data.utm && typeof data.utm === 'object'
       ? Object.fromEntries(Object.entries(data.utm).slice(0, 12).map(([k, v]) => [k.slice(0, 40), str(v)]))
@@ -67,14 +76,15 @@ export async function POST(req: Request) {
     company: str(data.company, 160),
     employees: str(data.employees, 40),
     interest: str(data.interest, 120),
-    product: str(data.product, 120),
-    productSlug: str(data.productSlug, 80),
-    question: str(data.question, 160),
-    answer: str(data.answer, 160),
-    source: str(data.source, 60),
+    product: autoQuote ? 'Seguro Auto' : str(data.product, 120),
+    productSlug: autoQuote ? 'seguro-auto' : str(data.productSlug, 80),
+    question: autoQuote ? 'Veículo e perfil' : str(data.question, 160),
+    answer: autoQuote ? autoQuoteNotice(autoQuote) : str(data.answer, 160),
+    source,
     page: str(data.page, 200),
     referrer: str(data.referrer, 300),
     utm,
+    ...(autoQuote ? { autoQuote } : {}),
     receivedAt: new Date().toISOString(),
   };
 
@@ -90,9 +100,16 @@ export async function POST(req: Request) {
   if (lead.answer) lines.push(`*${lead.question || 'Detalhe'}:* ${lead.answer}`);
   if (lead.interest) lines.push(`*Interesse:* ${lead.interest}`);
 
-  const manualUrl = whatsappUrl(lines.join('\n'));
+  const manualUrl = isAutoQuote ? undefined : whatsappUrl(lines.join('\n'));
   const webhook = process.env.LEAD_WEBHOOK_URL?.trim();
   const token = process.env.LEAD_WEBHOOK_TOKEN?.trim();
+  const error = isAutoQuote
+    ? 'Não conseguimos confirmar o recebimento da sua cotação. Tente novamente.'
+    : 'Não conseguimos confirmar o recebimento. Tente novamente ou envie pelo WhatsApp.';
+
+  if (isAutoQuote && (!webhook || !token)) {
+    return NextResponse.json({ ok: false, error }, { status: 503 });
+  }
 
   if (!webhook && !token) {
     return NextResponse.json({ ok: true, delivery: 'whatsapp', whatsappUrl: manualUrl });
@@ -134,7 +151,7 @@ export async function POST(req: Request) {
   return NextResponse.json(
     {
       ok: false,
-      error: 'Não conseguimos confirmar o recebimento. Tente novamente ou envie pelo WhatsApp.',
+      error,
       whatsappUrl: manualUrl,
     },
     { status: 503 },

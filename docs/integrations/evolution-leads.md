@@ -26,6 +26,16 @@ A resposta autenticada é HTTP 202 com `{ "accepted": true, "leadId": "<id receb
 Ela confirma a gravação no banco. O identificador é a chave primária da tabela e uma repetição com o mesmo
 identificador recebe a mesma confirmação sem iniciar outro aviso.
 
+As solicitações da página de Seguro Auto chegam com `source = auto-quote`. O aviso inclui o contato,
+o veículo, o CEP de pernoite, o uso, a idade do principal condutor e a indicação de seguro novo ou renovação.
+A data de nascimento deve ser consultada no registro interno pelo protocolo do pedido.
+
+```sql
+SELECT payload->'autoQuote' AS dados_da_cotacao
+FROM fastsecure_quote_leads
+WHERE lead_id = $1::uuid;
+```
+
 ## Reenvio do aviso
 
 O pedido permanece na tabela quando a Evolution está desconectada. A coluna `notification_submitted_at` indica
