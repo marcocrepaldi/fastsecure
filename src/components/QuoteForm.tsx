@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, CircleCheck, Lock, LoaderCircle, MessageCircle } from 'lucide-react';
 
 export type QuoteProduct = {
@@ -48,9 +48,11 @@ export default function QuoteForm({ product, productOptions, source, title, subt
   const [selected, setSelected] = useState(product?.slug ?? '');
   const [answer, setAnswer] = useState('');
   const [phone, setPhone] = useState('');
-  const [status, setStatus] = useState<'idle' | 'sending' | 'done'>('idle');
+  const [status, setStatus] = useState<'idle' | 'sending' | 'received' | 'whatsapp'>('idle');
   const [error, setError] = useState<string | null>(null);
   const [waUrl, setWaUrl] = useState<string | null>(null);
+  const attempt = useRef<{ payload: string; leadId: string } | null>(null);
+  const submitting = useRef(false);
 
   const productName =
     product?.name ?? productOptions?.flatMap((g) => g.items).find((i) => i.slug === selected)?.name ?? '';
@@ -58,53 +60,75 @@ export default function QuoteForm({ product, productOptions, source, title, subt
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
     setError(null);
+    setWaUrl(null);
     const fd = new FormData(e.currentTarget);
     setStatus('sending');
     try {
+      const payload = {
+        name: fd.get('name'),
+        phone,
+        email: fd.get('email'),
+        company: fd.get('company'),
+        website: fd.get('website'),
+        product: productName,
+        productSlug: selected,
+        question: product?.question.label,
+        answer,
+        source,
+        ...trackingData(),
+      };
+      const serialized = JSON.stringify(payload);
+      if (attempt.current?.payload !== serialized) {
+        attempt.current = { payload: serialized, leadId: crypto.randomUUID() };
+      }
+
       const res = await fetch('/api/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: fd.get('name'),
-          phone,
-          email: fd.get('email'),
-          company: fd.get('company'),
-          website: fd.get('website'),
-          product: productName,
-          productSlug: selected,
-          question: product?.question.label,
-          answer,
-          source,
-          ...trackingData(),
-        }),
+        body: JSON.stringify({ ...payload, leadId: attempt.current.leadId }),
       });
       const data = await res.json().catch(() => ({}));
+      if (typeof data.whatsappUrl === 'string') setWaUrl(data.whatsappUrl);
       if (!res.ok || !data.ok) throw new Error(data.error || 'Não foi possível enviar. Tente novamente.');
-      setWaUrl(data.whatsappUrl);
-      setStatus('done');
-      const w = window as unknown as { dataLayer?: object[] };
-      w.dataLayer?.push({ event: 'generate_lead', product: selected || productName, source });
-      window.open(data.whatsappUrl, '_blank', 'noopener,noreferrer');
+
+      if (data.delivery === 'received') {
+        setStatus('received');
+        const w = window as unknown as { dataLayer?: object[] };
+        w.dataLayer?.push({ event: 'generate_lead', product: selected || productName, source });
+      } else if (data.delivery === 'whatsapp' && typeof data.whatsappUrl === 'string') {
+        setStatus('whatsapp');
+      } else {
+        throw new Error('Não conseguimos confirmar o recebimento. Tente novamente.');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro inesperado.');
       setStatus('idle');
+    } finally {
+      submitting.current = false;
     }
   }
 
-  if (status === 'done') {
+  if (status === 'received' || status === 'whatsapp') {
+    const received = status === 'received';
     return (
       <div className="rounded-3xl bg-white p-8 text-center text-ink-900 shadow-lift" role="status">
-        <div className="mx-auto grid size-14 place-items-center rounded-full bg-volt-500">
-          <CircleCheck className="size-7" aria-hidden="true" />
+        <div className={`mx-auto grid size-14 place-items-center rounded-full ${received ? 'bg-volt-500' : 'bg-brand-50 text-brand-700'}`}>
+          {received
+            ? <CircleCheck className="size-7" aria-hidden="true" />
+            : <MessageCircle className="size-7" aria-hidden="true" />}
         </div>
-        <h3 className="display mt-5 text-2xl">Pedido recebido!</h3>
+        <h3 className="display mt-5 text-2xl">{received ? 'Pedido recebido!' : 'Envie seu pedido pelo WhatsApp'}</h3>
         <p className="mt-2 text-ink-500">
-          Um especialista vai falar com você pelo WhatsApp com as opções de {productName || 'cotação'}.
+          {received
+            ? `Um especialista vai falar com você pelo WhatsApp sobre ${productName || 'sua cotação'}.`
+            : 'Sua mensagem está pronta. Abra o WhatsApp e toque em enviar para concluir.'}
         </p>
-        {waUrl && (
+        {!received && waUrl && (
           <a href={waUrl} target="_blank" rel="noopener noreferrer" className="btn btn-brand mt-6 w-full">
-            <MessageCircle className="size-5" aria-hidden="true" /> Abrir o WhatsApp
+            <MessageCircle className="size-5" aria-hidden="true" /> Enviar pelo WhatsApp
           </a>
         )}
       </div>
@@ -232,9 +256,14 @@ export default function QuoteForm({ product, productOptions, source, title, subt
           </div>
 
           {error && (
-            <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700" role="alert">
-              {error}
-            </p>
+            <div className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              <p role="alert">{error}</p>
+              {waUrl && (
+                <a href={waUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block font-bold underline">
+                  Enviar pelo WhatsApp
+                </a>
+              )}
+            </div>
           )}
 
           <button type="submit" className="btn btn-volt w-full py-4 text-base" disabled={status === 'sending'}>

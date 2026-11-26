@@ -24,7 +24,7 @@ src/
     [slug]/opengraph-image   # imagem de compartilhamento por produto
     produtos/                # catálogo com busca e filtros
     privacidade/             # política de privacidade (LGPD)
-    api/lead/route.ts        # recebe leads → log + webhook opcional + link do WhatsApp
+    api/lead/route.ts        # recebe leads → webhook de registro ou envio manual pelo WhatsApp
     sitemap.ts robots.ts opengraph-image.tsx not-found.tsx
   components/                # Header, Footer, QuoteForm, CatalogBrowser, WhatsAppFab…
   lib/
@@ -42,12 +42,14 @@ src/
 
 ## Leads
 
-Cada envio de formulário chega em `POST /api/lead` com nome, WhatsApp, e-mail (opcional), empresa,
-produto, resposta da pergunta de qualificação, página de origem e parâmetros UTM. O lead é:
+Os formulários enviam o pedido para `POST /api/lead`, que o encaminha para `LEAD_WEBHOOK_URL` quando configurado.
+Com `LEAD_WEBHOOK_TOKEN`, o servidor envia autenticação Bearer e espera que o destino confirme a gravação
+com `{ "accepted": true, "leadId": "<id do pedido>" }`. Webhooks existentes sem token continuam aceitando
+o formato anterior do lead, acrescido do identificador, e são confirmados pelo status HTTP 2xx.
 
-1. registrado no log do servidor (`[LEAD] {...}`);
-2. enviado para `LEAD_WEBHOOK_URL`, se configurado;
-3. devolvido como link do WhatsApp com a mensagem pronta, que abre para o visitante.
+Após a confirmação, o visitante vê “Pedido recebido!” no site. Quando não há webhook ou a entrega não foi
+confirmada, o formulário oferece o envio manual pelo WhatsApp. Consulte o
+[fluxo de registro e aviso pela Evolution](docs/integrations/evolution-leads.md) para configurar a integração.
 
 ## Blog (`/blog`)
 

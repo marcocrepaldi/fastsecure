@@ -1,40 +1,37 @@
 import { NextResponse } from 'next/server';
 import { whatsappUrl } from '@/lib/site';
 
-/**
- * Recebe leads dos formulários do site.
- *
- * 1. Valida os campos e descarta bots (honeypot "website").
- * 2. Registra no log do servidor.
- * 3. Se LEAD_WEBHOOK_URL estiver definido, envia o lead em JSON para lá
- *    (CRM, Zapier, Make, n8n, planilha…). Falha no webhook não bloqueia o usuário.
- * 4. Devolve o link do WhatsApp com a mensagem pronta.
- */
-
 type LeadPayload = Partial<
   Record<
     | 'name' | 'phone' | 'email' | 'company' | 'website' | 'product' | 'productSlug'
     | 'question' | 'answer' | 'source' | 'page' | 'referrer'
-    | 'employees' | 'interest',
+    | 'employees' | 'interest' | 'leadId',
     unknown
   >
 > & { utm?: unknown };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const LEAD_ID_RE = /^[\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/i;
 
 const str = (v: unknown, max = 200) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 
 export async function POST(req: Request) {
+  if (req.headers.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json') {
+    return NextResponse.json({ ok: false, error: 'Formato de envio inválido.' }, { status: 415 });
+  }
+
   let data: LeadPayload;
   try {
-    data = await req.json();
+    const body: unknown = await req.json();
+    if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error('Invalid payload');
+    data = body;
   } catch {
     return NextResponse.json({ ok: false, error: 'Requisição inválida.' }, { status: 400 });
   }
 
   // Bot preencheu o campo invisível: responde OK sem registrar nada.
   if (str(data.website)) {
-    return NextResponse.json({ ok: true, whatsappUrl: whatsappUrl() });
+    return NextResponse.json({ ok: true, delivery: 'received' });
   }
 
   const name = str(data.name, 120);
@@ -54,10 +51,16 @@ export async function POST(req: Request) {
 
   const utm =
     data.utm && typeof data.utm === 'object'
-      ? Object.fromEntries(Object.entries(data.utm as Record<string, unknown>).map(([k, v]) => [k.slice(0, 40), str(v)]))
+      ? Object.fromEntries(Object.entries(data.utm).slice(0, 12).map(([k, v]) => [k.slice(0, 40), str(v)]))
       : {};
 
+  const requestedId = str(data.leadId, 72);
+  if (requestedId && !LEAD_ID_RE.test(requestedId)) {
+    return NextResponse.json({ ok: false, error: 'Identificador de envio inválido.' }, { status: 400 });
+  }
+
   const lead = {
+    leadId: requestedId || crypto.randomUUID(),
     name,
     phone,
     email,
@@ -75,23 +78,6 @@ export async function POST(req: Request) {
     receivedAt: new Date().toISOString(),
   };
 
-  console.log('[LEAD]', JSON.stringify(lead));
-
-  const webhook = process.env.LEAD_WEBHOOK_URL;
-  if (webhook) {
-    try {
-      const res = await fetch(webhook, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(lead),
-        signal: AbortSignal.timeout(5000),
-      });
-      if (!res.ok) console.error('[LEAD] webhook respondeu', res.status);
-    } catch (err) {
-      console.error('[LEAD] falha no webhook', err);
-    }
-  }
-
   const lines = [
     `Olá! Vim pelo site da Fast Secure e quero uma cotação${lead.product ? ` de *${lead.product}*` : ''}.`,
     '',
@@ -104,5 +90,53 @@ export async function POST(req: Request) {
   if (lead.answer) lines.push(`*${lead.question || 'Detalhe'}:* ${lead.answer}`);
   if (lead.interest) lines.push(`*Interesse:* ${lead.interest}`);
 
-  return NextResponse.json({ ok: true, whatsappUrl: whatsappUrl(lines.join('\n')) });
+  const manualUrl = whatsappUrl(lines.join('\n'));
+  const webhook = process.env.LEAD_WEBHOOK_URL?.trim();
+  const token = process.env.LEAD_WEBHOOK_TOKEN?.trim();
+
+  if (!webhook && !token) {
+    return NextResponse.json({ ok: true, delivery: 'whatsapp', whatsappUrl: manualUrl });
+  }
+
+  try {
+    if (!webhook) throw new Error('Missing webhook URL');
+    const endpoint = new URL(webhook);
+    const isLocalTest =
+      process.env.NODE_ENV !== 'production' &&
+      ['localhost', '127.0.0.1', '[::1]'].includes(endpoint.hostname);
+    if (token && endpoint.protocol !== 'https:' && !(isLocalTest && endpoint.protocol === 'http:')) {
+      throw new Error('Authenticated webhook requires HTTPS');
+    }
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(lead),
+      redirect: 'error',
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (res.ok) {
+      // No modo autenticado, o n8n confirma somente depois de gravar o pedido.
+      const receipt = token ? await res.json().catch(() => null) : null;
+      if (!token || (receipt?.accepted === true && receipt.leadId === lead.leadId)) {
+        return NextResponse.json({ ok: true, delivery: 'received' });
+      }
+    }
+    console.error('[LEAD] recebimento não confirmado', { leadId: lead.leadId, status: res.status });
+  } catch {
+    console.error('[LEAD] recebimento indisponível', { leadId: lead.leadId });
+  }
+
+  return NextResponse.json(
+    {
+      ok: false,
+      error: 'Não conseguimos confirmar o recebimento. Tente novamente ou envie pelo WhatsApp.',
+      whatsappUrl: manualUrl,
+    },
+    { status: 503 },
+  );
 }

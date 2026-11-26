@@ -1,0 +1,190 @@
+{
+  "name": "Fast Secure - Leads de cotação pela Evolution",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fastsecure-leads",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "8c226b03-7af5-4c11-94a4-57a6aabe9267",
+      "name": "Receber pedido",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "406dc984-b21f-4ee7-97ee-ace2ca246018",
+      "credentials": {
+        "httpHeaderAuth": { "id": null, "name": "Fast Secure - Autenticação do webhook" }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH new_lead AS (\n  INSERT INTO fastsecure_quote_leads (lead_id, payload)\n  VALUES ($1::uuid, $2::jsonb)\n  ON CONFLICT (lead_id) DO NOTHING\n  RETURNING lead_id\n)\nSELECT $1::text AS \"leadId\", EXISTS (SELECT 1 FROM new_lead) AS inserted;",
+        "options": {
+          "queryReplacement": "={{ [$json.body.leadId, JSON.stringify($json.body)] }}"
+        }
+      },
+      "id": "fae00f45-5077-4b6d-a6f2-f6812e92addf",
+      "name": "Registrar pedido",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        240,
+        0
+      ],
+      "credentials": {
+        "postgres": { "id": null, "name": "Fast Secure - PostgreSQL de cotações" }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { accepted: true, leadId: $json.leadId } }}",
+        "options": {
+          "responseCode": 202
+        }
+      },
+      "id": "b51357ff-1f38-4da2-9ba7-d0c4f0ec6dc8",
+      "name": "Confirmar recebimento",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "if (!$input.first().json.inserted) return [];\n\nconst lead = $('Receber pedido').first().json.body;\nconst digits = String(lead.phone).replace(/\\D/g, '');\nconst customer = digits.length <= 11 ? '55' + digits : digits;\nconst lines = [\n  'Nova cotação pelo site Fast Secure',\n  'Produto: ' + (lead.product || 'A confirmar'),\n  'Nome: ' + lead.name,\n  'WhatsApp: ' + lead.phone,\n  lead.answer ? (lead.question || 'Detalhe') + ': ' + lead.answer : '',\n  lead.company ? 'Empresa: ' + lead.company : '',\n  'Responder ao cliente: https://wa.me/' + customer,\n  'Protocolo: ' + lead.leadId,\n];\nreturn [{ json: { number: '5511927845928', text: lines.filter(Boolean).join('\\n') } }];"
+      },
+      "id": "097c52e1-3bbb-49c4-b916-386ca00db922",
+      "name": "Preparar aviso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evo.omnitheus.com.br/message/sendText/Instancia%20Principal%20FastSecure",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "timeout": 10000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          }
+        }
+      },
+      "id": "f6a3c46c-bf59-4fa5-81a0-f872701d8cfc",
+      "name": "Enviar pela Evolution",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": { "id": null, "name": "Fast Secure - Chave da instância Evolution" }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE fastsecure_quote_leads\nSET evolution_message_id = NULLIF($2::text, ''),\n    notification_submitted_at = now()\nWHERE lead_id = $1::uuid\n  AND notification_submitted_at IS NULL;",
+        "options": {
+          "queryReplacement": "={{ [$('Registrar pedido').first().json.leadId, $json.key?.id ?? ''] }}"
+        }
+      },
+      "id": "19ec3219-ba17-488d-8d96-fcfa418c3e26",
+      "name": "Registrar envio",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1200,
+        0
+      ],
+      "credentials": {
+        "postgres": { "id": null, "name": "Fast Secure - PostgreSQL de cotações" }
+      }
+    }
+  ],
+  "connections": {
+    "Receber pedido": {
+      "main": [
+        [
+          {
+            "node": "Registrar pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar pedido": {
+      "main": [
+        [
+          {
+            "node": "Confirmar recebimento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmar recebimento": {
+      "main": [
+        [
+          {
+            "node": "Preparar aviso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar aviso": {
+      "main": [
+        [
+          {
+            "node": "Enviar pela Evolution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar pela Evolution": {
+      "main": [
+        [
+          {
+            "node": "Registrar envio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false
+  }
+}
