@@ -1,7 +1,9 @@
 // Dados institucionais da Fast Secure — fonte única para layout, SEO e links.
 //
-// ⚠️ Revise antes do go-live: telefone, e-mail, endereço e números de prova
+// ⚠️ Revise antes do go-live: telefone, e-mail e números de prova
 // social (stats) vieram da versão anterior do site e precisam ser confirmados.
+
+const instagramHandle = 'fastsecureoficial';
 
 export const SITE = {
   name: 'Fast Secure',
@@ -14,10 +16,13 @@ export const SITE = {
   /** Mesmo número em formato internacional, para links tel: e dados estruturados. */
   phoneE164: '+5511927845928',
   email: 'contato@fastsecure.com.br',
+  instagram: { handle: instagramHandle, url: `https://www.instagram.com/${instagramHandle}/` },
   address: {
-    street: 'Av. Paulista, 1000',
+    street: 'R. Pais Leme, 215',
+    neighborhood: 'Pinheiros',
     city: 'São Paulo',
     region: 'SP',
+    postalCode: '05424-010',
     country: 'BR',
   },
   hours: 'Segunda a sexta, das 9h às 18h',

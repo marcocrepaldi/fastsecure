@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Mail, MapPin, Phone } from 'lucide-react';
+import { Camera, Mail, MapPin, Phone } from 'lucide-react';
 import { categories, productsIn } from '@/lib/products';
 import { SITE } from '@/lib/site';
 import Logo from './Logo';
@@ -31,8 +31,22 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-volt-500" aria-hidden="true" />
                 <span>
-                  {SITE.address.street} — {SITE.address.city}/{SITE.address.region}
+                  {SITE.address.street} — {SITE.address.neighborhood}
+                  <br />
+                  {SITE.address.city} - {SITE.address.region}, {SITE.address.postalCode}
                 </span>
+              </li>
+              <li>
+                <a
+                  href={SITE.instagram.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Instagram da Fast Secure (@${SITE.instagram.handle})`}
+                  className="inline-flex items-center gap-3 transition hover:text-white"
+                >
+                  <Camera className="size-4 text-volt-500" aria-hidden="true" />
+                  @{SITE.instagram.handle}
+                </a>
               </li>
             </ul>
           </div>
